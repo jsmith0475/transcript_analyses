@@ -15,6 +15,10 @@ Requirements
 - Python 3.11+, Redis 7+ (for local dev without Docker)
 
 Environment and API Key
+- Create .env (required): copy the template because other runtime variables live there, even if you plan to set your key in‑app.
+
+     cp .env.template .env
+
 - The app uses OpenAI by default. You have two ways to provide the API key:
   1) Server-wide: set `OPENAI_API_KEY` in `.env` (or export in your shell). Example (`.env.template`):
 
