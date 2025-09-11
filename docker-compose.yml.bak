@@ -1,0 +1,39 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    image: transcript-analysis:dev
+    env_file:
+      - .env
+    environment:
+      - OPENAI_MODEL=gpt-4o-mini
+      - REDIS_URL=redis://redis:6379
+      - FLASK_RUN_FROM_CLI=true
+      - FLASK_APP=src.app
+    volumes:
+      - .:/app
+    command: python -m flask run --host=0.0.0.0 --port=5000
+    ports:
+      - "5001:5000"
+    working_dir: /app
+    depends_on:
+      - redis
+
+  worker:
+    build: .
+    image: transcript-analysis:dev
+    env_file:
+      - .env
+    environment:
+      - OPENAI_MODEL=gpt-4o-mini
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: celery -A src.app.celery_app.celery worker --loglevel=info -Q celery,default
+    depends_on:
+      - redis

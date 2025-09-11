@@ -1,0 +1,1 @@
+{"model":"gpt-4o-mini","processing":{"max_concurrent":3,"parallel":true},"status":"ok","web":{"max_content_length":10485760,"socketio_async_mode":"eventlet","upload_folder":"uploads"}}

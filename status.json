@@ -1,0 +1,19 @@
+{
+    "doc": {
+        "createdAt": 1757191391.2657754,
+        "errors": [],
+        "final": {},
+        "jobId": "003457e3-97dd-438e-bc31-f312db72e0ba",
+        "stageA": {},
+        "stageB": {},
+        "status": "queued",
+        "tokenUsageTotal": {
+            "completion": 0,
+            "prompt": 0,
+            "total": 0
+        }
+    },
+    "jobId": "003457e3-97dd-438e-bc31-f312db72e0ba",
+    "ok": true,
+    "status": "queued"
+}

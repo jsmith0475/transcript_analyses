@@ -1,0 +1,41 @@
+============================================================
+PIPELINE DEBUG TEST
+============================================================
+✅ API is running
+SUBMITTING JOB WITH PAYLOAD:
+{
+  "transcriptText": "\n    Speaker 1: Let's discuss our new product strategy.\n    Speaker 2: I think we should focus on AI integration.\n    Speaker 1: That makes sense. What about the timeline?\n    Speaker 2: We could launch in Q2 next year.\n    ",
+  "selected": {
+    "stageA": [
+      "say_means",
+      "perspective_perception"
+    ],
+    "stageB": [
+      "competing_hypotheses",
+      "first_principles"
+    ],
+    "final": [
+      "meeting_notes",
+      "composite_note"
+    ]
+  }
+}
+------------------------------------------------------------
+Job ID: 450acb17-9d9b-4041-b5ed-822b5b8eae0c
+------------------------------------------------------------
+
+Status changed to: queued
+
+Current state at 0.0s:
+  Stage A analyzers: []
+  Stage B analyzers: []
+  Final outputs: []
+
+Status changed to: error
+
+Current state at 3.0s:
+  Stage A analyzers: []
+  Stage B analyzers: []
+  Final outputs: []
+
+Pipeline failed: ["'NoneType' object has no attribute 'emit'"]

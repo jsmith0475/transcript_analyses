@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1"
+  />
+  <title>Transcript Analysis Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+    integrity="sha512-Xb8CwQ5b42EwYJw6nqSjO5qkV0t8F3S8geS7Wl2TajvEy5yWpr/4pvC6usw3q1tw/2t9wE+7qI4q3GQZ7m6q9A=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
+    .badge { border-radius: 0.375rem; padding: 0.125rem 0.5rem; font-size: 0.75rem; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <header class="mb-6">
+      <h1 class="text-2xl font-semibold">Transcript Analysis Tool</h1>
+      <p class="text-sm text-gray-600">Paste or load a transcript, select analyzers and prompts, run the pipeline, and view results.</p>
+      <div class="mt-2 flex items-center gap-2 text-xs">
+        <label class="flex items-center gap-2">
+          <span class="text-gray-600">Your OpenAI API Key</span>
+          <input id="userApiKeyInput" type="password" placeholder="sk-…" class="border rounded p-1 text-xs w-64" />
+        </label>
+        <button id="userApiKeySave" class="px-2 py-1 border rounded">Save</button>
+        <button id="userApiKeyTest" class="px-2 py-1 border rounded">Test</button>
+        <button id="userApiKeyClear" class="px-2 py-1 border rounded">Clear</button>
+        <span id="userApiKeyStatus" class="ml-2 text-gray-500"></span>
+      </div>
+    </header>
+
+    <!-- Input & Config -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Transcript Input -->
+      <div class="lg:col-span-2 bg-white shadow rounded p-4">
+        <h2 class="font-medium mb-3">Transcript</h2>
+        <div class="mb-3">
+          <textarea id="transcriptText" class="w-full h-48 border rounded p-2 font-mono text-sm" placeholder="Paste transcript text here..."></textarea>
+        </div>
+        <div class="flex items-center gap-3">
+          <input id="fileInput" type="file" accept=".txt,.md,.markdown" class="hidden" />
+          <button id="chooseFileBtn" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded border text-sm">Choose File</button>
+          <span id="chosenFileName" class="text-xs text-gray-500"></span>
+          <span class="ml-auto text-xs text-gray-500">Max size 10MB</span>
+        </div>
+      </div>
+
+      <!-- Analyzer Selection + Stage Options -->
+      <div class="bg-white shadow rounded p-4">
+        <h2 class="font-medium mb-3">Analyzers & Prompts</h2>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-medium">Stage A</h3>
+            <div class="text-xs flex items-center gap-2">
+              <button data-sel="stageA" class="selectAll px-2 py-1 border rounded">All</button>
+              <button data-sel="stageA" class="deselectAll px-2 py-1 border rounded">None</button>
+              <button class="addAnalyzer px-2 py-1 border rounded" data-stage="stageA" title="Add custom analyzer">Add</button>
+              <button class="rescanAnalyzers px-2 py-1 border rounded" data-stage="stageA" title="Rescan prompt files">Rescan</button>
+              <button class="cleanupDuplicates px-2 py-1 border rounded" data-stage="stageA" title="Cleanup duplicate analyzers">Cleanup</button>
+            </div>
+          </div>
+          <div class="mb-2 text-xs">
+            <label class="block">
+              <span class="text-gray-600">Model (Stage A)</span>
+              <select id="optModelStageA" class="w-full border rounded p-1 text-sm">
+                <option value="">Server default (use backend OPENAI_MODEL)</option>
+                <option value="gpt-4o-mini">gpt-4o-mini — fast, cost‑effective</option>
+                <option value="gpt-4o">gpt-4o — stronger reasoning</option>
+                <option value="gpt-5">gpt-5 — most capable, complex/agentic tasks</option>
+                <option value="gpt-5-mini">gpt-5-mini — balanced cost/latency/capability</option>
+                <option value="gpt-5-nano">gpt-5-nano — highest throughput, simple tasks</option>
+              </select>
+            </label>
+          </div>
+          <div id="stageAList" class="space-y-2"></div>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-medium">Stage B</h3>
+            <div class="text-xs flex items-center gap-2">
+              <button data-sel="stageB" class="selectAll px-2 py-1 border rounded">All</button>
+              <button data-sel="stageB" class="deselectAll px-2 py-1 border rounded">None</button>
+              <button class="addAnalyzer px-2 py-1 border rounded" data-stage="stageB" title="Add custom analyzer">Add</button>
+              <button class="rescanAnalyzers px-2 py-1 border rounded" data-stage="stageB" title="Rescan prompt files">Rescan</button>
+              <button class="cleanupDuplicates px-2 py-1 border rounded" data-stage="stageB" title="Cleanup duplicate analyzers">Cleanup</button>
+            </div>
+          </div>
+          <div class="mb-2 text-xs">
+            <label class="block">
+              <span class="text-gray-600">Model (Stage B)</span>
+              <select id="optModelStageB" class="w-full border rounded p-1 text-sm">
+                <option value="">Server default (use backend OPENAI_MODEL)</option>
+                <option value="gpt-4o-mini">gpt-4o-mini — fast, cost‑effective</option>
+                <option value="gpt-4o">gpt-4o — stronger reasoning</option>
+                <option value="gpt-5">gpt-5 — most capable, complex/agentic tasks</option>
+                <option value="gpt-5-mini">gpt-5-mini — balanced cost/latency/capability</option>
+                <option value="gpt-5-nano">gpt-5-nano — highest throughput, simple tasks</option>
+              </select>
+            </label>
+          </div>
+          <div id="stageBList" class="space-y-2"></div>
+
+          <!-- Stage B Options -->
+          <details class="mt-2">
+            <summary class="text-sm font-medium cursor-pointer">Stage B Options</summary>
+            <div class="mt-2 space-y-2 text-sm">
+              <label class="flex items-center gap-2">
+                <input id="optStageBIncludeTranscript" type="checkbox" class="accent-blue-600" />
+                Include original transcript
+              </label>
+              <label class="block">
+                <span class="text-xs text-gray-600">Transcript inclusion mode</span>
+                <select id="optStageBMode" class="w-full border rounded p-1 text-sm">
+                  <option value="full">Full</option>
+                  <option value="summary">Summary</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="text-xs text-gray-600">Max characters</span>
+                <input id="optStageBMaxChars" type="number" min="500" step="500" value="20000" class="w-full border rounded p-1 text-sm" />
+              </label>
+            </div>
+          </details>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-medium">Final</h3>
+            <div class="text-xs flex items-center gap-2">
+              <button data-sel="final" class="selectAll px-2 py-1 border rounded">All</button>
+              <button data-sel="final" class="deselectAll px-2 py-1 border rounded">None</button>
+              <button class="addAnalyzer px-2 py-1 border rounded" data-stage="final" title="Add custom analyzer">Add</button>
+              <button class="rescanAnalyzers px-2 py-1 border rounded" data-stage="final" title="Rescan prompt files">Rescan</button>
+              <button class="cleanupDuplicates px-2 py-1 border rounded" data-stage="final" title="Cleanup duplicate analyzers">Cleanup</button>
+            </div>
+          </div>
+          <div class="mb-2 text-xs">
+            <label class="block">
+              <span class="text-gray-600">Model (Final)</span>
+              <select id="optModelFinal" class="w-full border rounded p-1 text-sm">
+                <option value="">Server default (use backend OPENAI_MODEL)</option>
+                <option value="gpt-4o-mini">gpt-4o-mini — fast, cost‑effective</option>
+                <option value="gpt-4o">gpt-4o — stronger reasoning</option>
+                <option value="gpt-5">gpt-5 — most capable, complex/agentic tasks</option>
+                <option value="gpt-5-mini">gpt-5-mini — balanced cost/latency/capability</option>
+                <option value="gpt-5-nano">gpt-5-nano — highest throughput, simple tasks</option>
+              </select>
+            </label>
+          </div>
+          <div id="finalList" class="space-y-2"></div>
+
+          <!-- Final Options -->
+          <details class="mt-2">
+            <summary class="text-sm font-medium cursor-pointer">Final Options</summary>
+            <div class="mt-2 space-y-2 text-sm">
+              <label class="flex items-center gap-2">
+                <input id="optFinalIncludeTranscript" type="checkbox" class="accent-blue-600" checked />
+                Include original transcript
+              </label>
+              <label class="block">
+                <span class="text-xs text-gray-600">Transcript inclusion mode</span>
+                <select id="optFinalMode" class="w-full border rounded p-1 text-sm">
+                  <option value="full">Full</option>
+                  <option value="summary">Summary</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="text-xs text-gray-600">Max characters</span>
+                <input id="optFinalMaxChars" type="number" min="500" step="500" value="20000" class="w-full border rounded p-1 text-sm" />
+              </label>
+            </div>
+          </details>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="startBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Start Analysis</button>
+          <button id="resetBtn" class="px-3 py-2 border rounded">Reset</button>
+          <span id="jobIndicator" class="ml-auto text-xs text-gray-500"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress -->
+    <section class="mt-6 bg-white shadow rounded p-4">
+      <div class="flex items-center justify-between">
+        <h2 class="font-medium">Progress</h2>
+        <div id="overallStats" class="text-xs text-gray-600"></div>
+      </div>
+
+      <!-- Simple progress bar -->
+      <div class="mt-2">
+        <div class="w-full bg-gray-200 rounded h-2">
+          <div id="progressInner" class="bg-blue-600 h-2 rounded" style="width:0%"></div>
+        </div>
+        <div id="progressLabel" class="text-xs text-gray-600 mt-1">0%</div>
+      </div>
+
+      <div id="progressGrid" class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </section>
+
+    <!-- Insights Dashboard -->
+    <section class="mt-6 bg-white shadow rounded p-4">
+      <div class="flex items-center gap-2">
+        <h2 class="font-medium">Insights</h2>
+        <span id="insightsCounts" class="text-xs text-gray-500"></span>
+        <div class="ml-auto flex items-center gap-2 text-xs">
+          <input id="insightsJobId" type="text" placeholder="Job ID (optional)" class="border rounded p-1 text-xs w-56" />
+          <button id="loadInsightsBtn" class="px-2 py-1 border rounded">Load</button>
+          <label class="text-gray-600">Type</label>
+          <select id="insightsFilter" class="border rounded p-1 text-xs">
+            <option value="all">All</option>
+            <option value="action">Actions</option>
+            <option value="decision">Decisions</option>
+            <option value="risk">Risks</option>
+          </select>
+          <button id="exportInsightsJson" class="px-2 py-1 border rounded">Export JSON</button>
+          <button id="exportInsightsCsv" class="px-2 py-1 border rounded">Export CSV</button>
+          <button id="exportInsightsMd" class="px-2 py-1 border rounded">Export MD</button>
+        </div>
+      </div>
+      <div class="mt-3 overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="text-left border-b">
+            <tr>
+              <th class="py-2 pr-4">Type</th>
+              <th class="py-2 pr-4">Summary</th>
+              <th class="py-2 pr-4">Owner</th>
+              <th class="py-2 pr-4">Due</th>
+              <th class="py-2 pr-4">Source</th>
+              <th class="py-2 pr-4">Evidence</th>
+            </tr>
+          </thead>
+          <tbody id="insightsTableBody"></tbody>
+        </table>
+        <div id="insightsEmpty" class="text-xs text-gray-500 py-3 hidden">No insights yet…</div>
+      </div>
+    </section>
+
+    <!-- Results Tabs -->
+    <section class="mt-6 bg-white shadow rounded p-4">
+      <div class="flex items-center gap-4 border-b">
+        <button data-tab="stageA" class="tabBtn py-2 px-2 text-sm tab-active">Stage A</button>
+        <button data-tab="stageB" class="tabBtn py-2 px-2 text-sm">Stage B</button>
+        <button data-tab="final" class="tabBtn py-2 px-2 text-sm">Final</button>
+        <div class="ml-auto space-x-2">
+          <button id="copyBtn" class="px-2 py-1 border rounded text-sm">Copy</button>
+          <button id="downloadBtn" class="px-2 py-1 border rounded text-sm">Download</button>
+        </div>
+      </div>
+      <div id="resultsContent" class="mt-4 prose max-w-none"></div>
+    </section>
+
+    <!-- Inter-Stage Context Panel -->
+    <section class="mt-6 bg-white shadow rounded">
+      <div class="flex items-center justify-between px-4 py-2 border-b cursor-pointer" onclick="toggleContextPanel()">
+        <h2 class="font-medium">Inter-Stage Context</h2>
+        <div class="flex items-center gap-2">
+          <button id="copyContextBtn" class="px-2 py-1 border rounded text-xs" onclick="copyContext(event)">Copy</button>
+          <button id="downloadContextBtn" class="px-2 py-1 border rounded text-xs" onclick="downloadContext(event)">Download</button>
+          <svg id="contextToggleIcon" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+      <div id="contextPanelContent" class="hidden">
+        <div class="px-4 py-2 border-b bg-gray-50">
+          <div class="flex items-center gap-2 text-xs">
+            <button class="px-2 py-1 border rounded" id="btnCtxAB" onclick="showInterstage('AtoB')">Stage A → Stage B</button>
+            <button class="px-2 py-1 border rounded" id="btnCtxBF" onclick="showInterstage('BtoFinal')">Stage B → Final</button>
+            <span id="contextMeta" class="ml-auto text-gray-500"></span>
+          </div>
+        </div>
+        <div class="h-64 overflow-y-auto p-4 font-mono text-xs bg-gray-900 text-gray-100">
+          <pre id="interstageContextText" class="whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Insights state and rendering
+    const Insights = {
+      items: [],
+      counts: { total: 0, actions: 0, decisions: 0, risks: 0 },
+      filter: 'all',
+    };
+    // Expose to other scripts
+    window.Insights = Insights;
+
+    function clearInsights() {
+      try {
+        Insights.items = [];
+        Insights.counts = { total: 0, actions: 0, decisions: 0, risks: 0 };
+        Insights.filter = 'all';
+        renderInsights();
+      } catch (e) { /* no-op */ }
+    }
+    window.clearInsights = clearInsights;
+
+    async function loadInsights(jobIdOverride, retries = 60) {
+      try {
+        let jobTxt = (document.getElementById('jobIndicator')?.textContent || '').replace(/^Job:\s*/, '').trim();
+        if (jobIdOverride && String(jobIdOverride).trim()) jobTxt = String(jobIdOverride).trim();
+        if (!jobTxt) return;
+        const data = await window.API.getInsights(jobTxt).catch(() => null);
+        if (!data || data.ok === false) {
+          if (retries > 0) {
+            // Retry shortly to avoid races with file writes
+            setTimeout(() => loadInsights(jobTxt, retries - 1), 1000);
+            return;
+          }
+          Insights.items = [];
+          Insights.counts = { total: 0, actions: 0, decisions: 0, risks: 0 };
+          renderInsights();
+          return;
+        }
+        Insights.items = data.items || [];
+        Insights.counts = data.counts || { total: 0, actions: 0, decisions: 0, risks: 0 };
+        renderInsights();
+      } catch (e) {
+        if (retries > 0) {
+          setTimeout(() => loadInsights(jobIdOverride, retries - 1), 1000);
+        }
+      }
+    }
+    window.loadInsights = loadInsights;
+
+    function renderInsights() {
+      const countsEl = document.getElementById('insightsCounts');
+      const tbody = document.getElementById('insightsTableBody');
+      const empty = document.getElementById('insightsEmpty');
+      const sel = document.getElementById('insightsFilter');
+      const f = (Insights.filter || 'all').toLowerCase();
+      if (sel && sel.value !== f) { try { sel.value = f; } catch {} }
+      // Update option labels with counts to make the control feel responsive
+      try {
+        const total = (Insights.items || []).length;
+        const actions = (Insights.items || []).filter(it => String(it.type).toLowerCase() === 'action').length;
+        const decisions = (Insights.items || []).filter(it => String(it.type).toLowerCase() === 'decision').length;
+        const risks = (Insights.items || []).filter(it => String(it.type).toLowerCase() === 'risk').length;
+        if (sel && sel.options && sel.options.length) {
+          for (const opt of sel.options) {
+            const v = String(opt.value).toLowerCase();
+            if (v === 'all') opt.textContent = `All (${total})`;
+            if (v === 'action') opt.textContent = `Actions (${actions})`;
+            if (v === 'decision') opt.textContent = `Decisions (${decisions})`;
+            if (v === 'risk') opt.textContent = `Risks (${risks})`;
+          }
+        }
+      } catch {}
+      const rows = (Insights.items || []).filter(it => f === 'all' ? true : (String(it.type).toLowerCase() === f));
+      if (countsEl) {
+        countsEl.textContent = `Total: ${Insights.counts.total} | Actions: ${Insights.counts.actions} | Decisions: ${Insights.counts.decisions} | Risks: ${Insights.counts.risks}` + (f !== 'all' ? ` (showing ${rows.length})` : '');
+      }
+      if (!rows.length) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      tbody.innerHTML = rows.map(it => {
+        const owner = it.owner || '';
+        const due = it.due_date || '';
+        const src = it.source_analyzer || '';
+        const ev = it.evidence || {};
+        const quote = (ev.quote || '').replace(/\n/g, ' ').slice(0, 120);
+        const anchor = (it.links && it.links.transcript_anchor) ? it.links.transcript_anchor : '';
+        const evHtml = anchor ? `<a href="${anchor}" class="text-blue-600 hover:underline" title="Open transcript segment">${quote || '(link)'}</a>` : quote;
+        return `<tr class="border-b align-top">
+          <td class="py-2 pr-4 text-gray-700">${escapeHtml(it.type)}</td>
+          <td class="py-2 pr-4">${escapeHtml(it.title || '')}</td>
+          <td class="py-2 pr-4">${escapeHtml(owner)}</td>
+          <td class="py-2 pr-4">${escapeHtml(due)}</td>
+          <td class="py-2 pr-4 text-gray-600">${escapeHtml(src)}</td>
+          <td class="py-2 pr-4 text-gray-600">${evHtml}</td>
+        </tr>`;
+      }).join('');
+    }
+    window.renderInsights = renderInsights;
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"]{1}/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    async function exportInsights(ext) {
+      const jobTxt = (document.getElementById('jobIndicator')?.textContent || '').replace(/^Job:\s*/, '').trim();
+      if (!jobTxt) return;
+      const path = ext === 'json' ? 'final/insight_dashboard.json' : (ext === 'csv' ? 'final/insight_dashboard.csv' : 'final/insight_dashboard.md');
+      try {
+        const params = new URLSearchParams();
+        params.set('jobId', jobTxt);
+        params.set('path', path);
+        const res = await fetch(`/api/job-file?${params.toString()}`);
+        const j = await res.json();
+        if (!res.ok || !j || !j.ok || !j.content) throw new Error('Not available');
+        const blob = new Blob([j.content], { type: ext === 'json' ? 'application/json' : (ext === 'csv' ? 'text/csv' : 'text/markdown') });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `insight_dashboard.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch (e) {
+        alert('Insight export not available yet. Try after Final completes.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // User API key wiring
+      (async () => {
+        try {
+          const st = await window.API.userKeyStatus();
+          const statusEl = document.getElementById('userApiKeyStatus');
+          if (st && st.ok) {
+            if (st.present) {
+              statusEl.textContent = `Using your key (${st.masked})`;
+            } else {
+              statusEl.textContent = 'Using server default key';
+            }
+          }
+        } catch {}
+      })();
+      const saveBtn = document.getElementById('userApiKeySave');
+      const testBtn = document.getElementById('userApiKeyTest');
+      const clearBtn = document.getElementById('userApiKeyClear');
+      const input = document.getElementById('userApiKeyInput');
+      const statusEl = document.getElementById('userApiKeyStatus');
+      if (saveBtn && input) {
+        saveBtn.addEventListener('click', async () => {
+          const v = (input.value || '').trim();
+          if (!v) { statusEl.textContent = 'Enter a key.'; return; }
+          try {
+            const res = await window.API.userKeySet(v);
+            if (res && res.ok) {
+              statusEl.textContent = 'Saved. Using your key.';
+              setTimeout(() => { statusEl.textContent = '' }, 2500);
+            }
+          } catch (e) { statusEl.textContent = 'Save failed.'; }
+        });
+      }
+      if (clearBtn) {
+        clearBtn.addEventListener('click', async () => {
+          try { await window.API.userKeyDelete(); statusEl.textContent = 'Cleared. Using server default.'; setTimeout(() => { statusEl.textContent = '' }, 2500); } catch {}
+        });
+      }
+      if (testBtn) {
+        testBtn.addEventListener('click', async () => {
+          try {
+            const v = (input.value || '').trim();
+            statusEl.textContent = 'Testing…';
+            const res = await window.API.userKeyValidate(v || undefined);
+            if (res && res.ok) {
+              statusEl.textContent = 'Key is valid.';
+            } else {
+              statusEl.textContent = 'Invalid key.';
+            }
+          } catch (e) {
+            statusEl.textContent = 'Invalid key or network error.';
+          } finally {
+            setTimeout(() => { statusEl.textContent = '' }, 3000);
+          }
+        });
+      }
+      // Always start with a cleared Insights panel
+      try { clearInsights(); } catch {}
+
+      const sel = document.getElementById('insightsFilter');
+      if (sel) {
+        try { sel.disabled = false; } catch {}
+        const onSel = (e) => { Insights.filter = e.target.value; renderInsights(); };
+        sel.addEventListener('change', onSel);
+        sel.addEventListener('input', onSel);
+      }
+      const btnJ = document.getElementById('exportInsightsJson');
+      const btnC = document.getElementById('exportInsightsCsv');
+      const btnM = document.getElementById('exportInsightsMd');
+      if (btnJ) btnJ.addEventListener('click', () => exportInsights('json'));
+      if (btnC) btnC.addEventListener('click', () => exportInsights('csv'));
+      if (btnM) btnM.addEventListener('click', () => exportInsights('md'));
+      // Prefill job ID from indicator if present; otherwise fetch latest
+      const ind = document.getElementById('jobIndicator');
+      let jobTxt = (ind?.textContent || '').replace(/^Job:\s*/, '').trim();
+      const jobInput = document.getElementById('insightsJobId');
+      if (jobInput && jobTxt) {
+        jobInput.value = jobTxt;
+      } else {
+        // Try to auto-detect latest job, but do not auto-load insights to keep panel cleared
+        (async () => {
+          try {
+            const latest = await window.API.getJobsLatest();
+            if (latest && latest.ok && latest.jobId) {
+              if (jobInput) jobInput.value = latest.jobId;
+            }
+          } catch {}
+        })();
+      }
+      const loadBtn = document.getElementById('loadInsightsBtn');
+      if (loadBtn && jobInput) loadBtn.addEventListener('click', () => loadInsights(jobInput.value, 60));
+    });
+    // Inter-Stage Context panel logic
+    let activeContextKey = 'AtoB';
+    const interstage = { AtoB: { text: '', meta: {} }, BtoFinal: { text: '', meta: {} } };
+
+    function toggleContextPanel() {
+      const content = document.getElementById('contextPanelContent');
+      const icon = document.getElementById('contextToggleIcon');
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+
+    function setInterstageContext(kind, payload) {
+      const key = (kind === 'BtoFinal') ? 'BtoFinal' : 'AtoB';
+      const base = (payload && (payload.contextText || payload.preview)) || '';
+      let txt = base;
+      try {
+        const tIncluded = !!(payload && payload.transcriptIncluded);
+        const tPrev = payload && (payload.transcriptPreview || payload.transcriptText);
+        if (tIncluded && tPrev) {
+          txt = `${base}\n\n---\nTRANSCRIPT (included preview)\n${tPrev}`;
+        }
+      } catch (e) { /* no-op */ }
+      const meta = {
+        included: payload && payload.included,
+        tokens: payload && (payload.finalTokens || payload.totalTokens),
+        analyzer: payload && payload.analyzer,
+      };
+      interstage[key] = { text: txt, meta };
+      // If user is viewing this key, update display now
+      if (activeContextKey === key) {
+        renderInterstage();
+      }
+      // Ensure panel is visible when first populated
+      const content = document.getElementById('contextPanelContent');
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        const icon = document.getElementById('contextToggleIcon');
+        icon.classList.add('rotate-180');
+      }
+    }
+    window.setInterstageContext = setInterstageContext;
+
+    function showInterstage(kind) {
+      activeContextKey = (kind === 'BtoFinal') ? 'BtoFinal' : 'AtoB';
+      // Update button styles
+      const ab = document.getElementById('btnCtxAB');
+      const bf = document.getElementById('btnCtxBF');
+      if (activeContextKey === 'AtoB') {
+        ab.classList.add('bg-blue-100','text-blue-700'); bf.classList.remove('bg-blue-100','text-blue-700');
+      } else {
+        bf.classList.add('bg-blue-100','text-blue-700'); ab.classList.remove('bg-blue-100','text-blue-700');
+      }
+      renderInterstage();
+    }
+    window.showInterstage = showInterstage;
+
+    function renderInterstage() {
+      const obj = interstage[activeContextKey] || { text: '', meta: {} };
+      const pre = document.getElementById('interstageContextText');
+      pre.textContent = obj.text || '(context not yet available)';
+      const metaEl = document.getElementById('contextMeta');
+      const tokens = obj.meta && (obj.meta.tokens || '');
+      const inc = (obj.meta && obj.meta.included && obj.meta.included.length) ? obj.meta.included.join(', ') : '';
+      metaEl.textContent = [
+        activeContextKey === 'AtoB' ? 'From Stage A → B' : 'From Stage B → Final',
+        tokens ? `Tokens: ${tokens}` : '',
+        inc ? `Included: ${inc}` : ''
+      ].filter(Boolean).join(' | ');
+    }
+
+    function copyContext(event) {
+      event.stopPropagation();
+      const txt = (interstage[activeContextKey] && interstage[activeContextKey].text) || '';
+      if (!txt) return;
+      navigator.clipboard.writeText(txt).catch(() => {});
+    }
+
+    function downloadContext(event) {
+      event.stopPropagation();
+      const txt = (interstage[activeContextKey] && interstage[activeContextKey].text) || '';
+      const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      const fname = activeContextKey === 'AtoB' ? 'stageA_to_stageB_context.txt' : 'stageB_to_final_context.txt';
+      a.href = URL.createObjectURL(blob);
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // Default active view
+    document.addEventListener('DOMContentLoaded', function() {
+      showInterstage('AtoB');
+    });
+  </script>
+
+  <!-- Analyzer CRUD Modal -->
+  <div id="analyzerCrudModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-white w-[95%] max-w-lg rounded shadow">
+      <div class="flex items-center justify-between px-4 py-2 border-b">
+        <h3 class="font-medium">Add Analyzer</h3>
+        <button id="closeAnalyzerCrudBtn" class="px-2 py-1 border rounded text-sm">Close</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="grid grid-cols-1 gap-3">
+          <label class="block text-sm">
+            <span class="text-xs text-gray-600">Stage</span>
+            <select id="analyzerStage" class="w-full border rounded p-1 text-sm">
+              <option value="stageA">Stage A</option>
+              <option value="stageB">Stage B</option>
+              <option value="final">Final</option>
+            </select>
+          </label>
+          <div class="border rounded p-2">
+            <label class="flex items-center gap-2 text-sm">
+              <input id="analyzerFromFileToggle" type="checkbox" class="accent-blue-600" />
+              Create from existing prompt file
+            </label>
+            <div class="mt-2 grid grid-cols-1 gap-2">
+              <label class="block text-sm">
+                <span class="text-xs text-gray-600">Prompt file (in selected stage)</span>
+                <select id="analyzerFromFileSelect" class="w-full border rounded p-1 text-sm" disabled>
+                  <option value="">— Select a file —</option>
+                </select>
+              </label>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">Tip: We derive the slug from the filename if left blank.</p>
+          </div>
+          <label class="block text-sm">
+            <span class="text-xs text-gray-600">Slug (snake_case)</span>
+            <input id="analyzerSlug" type="text" class="w-full border rounded p-1 text-sm" placeholder="e.g., theme_extractor">
+          </label>
+          <label class="block text-sm">
+            <span class="text-xs text-gray-600">Display Name</span>
+            <input id="analyzerDisplayName" type="text" class="w-full border rounded p-1 text-sm" placeholder="e.g., Theme Extractor">
+          </label>
+          <label class="block text-sm">
+            <span class="text-xs text-gray-600">Prompt Content (optional if you will map to an existing prompt later)</span>
+            <textarea id="analyzerPromptContent" class="w-full h-40 border rounded p-2 font-mono text-sm" placeholder="Paste a free-form prompt. Click Normalize to wrap to standard schema."></textarea>
+            <div class="mt-2 flex items-center gap-2">
+              <button id="normalizePromptBtn" class="px-2 py-1 border rounded text-xs">Normalize</button>
+              <span id="normalizeStatus" class="text-xs text-gray-500"></span>
+            </div>
+          </label>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="createAnalyzerBtn" class="px-3 py-2 bg-blue-600 text-white rounded text-sm">Create</button>
+          <span id="analyzerCrudStatus" class="ml-auto text-xs text-gray-500"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt Editor Modal -->
+  <div id="promptEditorModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-white w-[95%] max-w-3xl rounded shadow">
+      <div class="flex items-center justify-between px-4 py-2 border-b">
+        <h3 class="font-medium">Edit Prompt</h3>
+        <button id="closeEditorBtn" class="px-2 py-1 border rounded text-sm">Close</button>
+      </div>
+      <div class="p-4 space-y-2">
+        <div class="text-xs text-gray-500">
+          <span id="editorPath"></span>
+        </div>
+        <textarea id="editorContent" class="w-full h-72 border rounded p-2 font-mono text-sm"></textarea>
+        <div class="flex items-center gap-2">
+          <button id="savePromptBtn" class="px-3 py-2 bg-blue-600 text-white rounded text-sm">Save</button>
+          <button id="resetPromptBtn" class="px-3 py-2 border rounded text-sm">Reset to Default Path</button>
+          <button id="deleteAllPromptsBtn" class="px-3 py-2 border border-red-600 text-red-700 rounded text-sm" title="Delete all .md prompts under prompts/ (Danger)">Delete All Prompts</button>
+          <span id="editorStatus" class="ml-auto text-xs text-gray-500"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor scripts -->
+  <!-- Use Socket.IO v4 client from CDN to match Flask-SocketIO server -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"
+    integrity="sha512-Hn+qyDUiAG0Qwe0Z2RPUiKpyD/UWrJwSGdA9uEWtV6yEODQ3ER5SKd4pKwrX2snIVsONwRrKyf1nQS8a8eK5Ew=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
+    integrity="sha512-6z4r2gq3y0gqh+Kn9U1kZUp3v0QvT2M8c4bN3p1RZl3nBM1Yb1z9X5kGgA1yq1Zlsw2pO8kZr1fE8p0p3oGQjw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+
+  <!-- App scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/ws.js"></script>
+  <script src="/static/js/ui.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--stop-writes-on-bgsave-error", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    image: transcript-analysis:dev
+    env_file:
+      - .env
+    environment:
+      - OPENAI_MODEL=gpt-5
+      - REDIS_URL=redis://redis:6379
+      - FLASK_APP=src.app
+      - EVENTLET_NO_GREENDNS=yes
+    volumes:
+      - .:/app
+    command: ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "src.app:create_app()"]
+    ports:
+      - "5001:5000"
+    working_dir: /app
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request,sys; sys.exit(0) if urllib.request.urlopen(\"http://localhost:5000/health\", timeout=5).status==200 else sys.exit(1)' "]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  worker:
+    build: .
+    image: transcript-analysis:dev
+    env_file:
+      - .env
+    environment:
+      - OPENAI_MODEL=gpt-5
+      - REDIS_URL=redis://redis:6379
+      - EVENTLET_NO_GREENDNS=yes
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: celery -A src.app.celery_app.celery worker --loglevel=info -Q celery,default
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A src.app.celery_app.celery inspect ping -t 5 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
