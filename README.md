@@ -98,6 +98,7 @@ Prompts
   - Delete a selected prompt file (Delete)
   - Reset the editor to a stage‑appropriate template
   - Delete all prompt files (in the editor modal)
+  - Advanced prompt selection per analyzer (per‑run only): enable the “Advanced” toggle to reveal a prompt dropdown. Dropdowns only appear when an analyzer has more than one prompt option. Selecting a different prompt updates the label next to the analyzer, and that prompt path is used for this run only.
 
 Running an Analysis
 1) Paste transcript text or choose a file.
@@ -105,6 +106,7 @@ Running an Analysis
 3) Click Start. Watch live progress and results populate.
   - Results render as Markdown with code highlighting and readable typography (no raw `#` headers).
   - The results pane uses a light card (black text on white) regardless of OS/browser dark mode.
+  - Tables are server‑normalized (even if the model returns them inside code blocks) to display as real Markdown tables.
 
 Key Endpoints
 - UI: `/`

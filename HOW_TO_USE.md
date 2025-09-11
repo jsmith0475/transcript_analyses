@@ -30,7 +30,9 @@ Prerequisites
 4) Choose Analyzers and Prompts
 - Each stage lists available analyzers with a prompt dropdown.
 - Prompts are Markdown files under `prompts/` and are auto‑discovered at startup.
-- You can change the selected prompt for any analyzer using the dropdown.
+- Simplified UI: prompt dropdowns are hidden by default. Enable the “Advanced” toggle to reveal them.
+- Dropdowns only appear when an analyzer has more than one prompt option.
+- You can change the selected prompt for any analyzer using the dropdown; the label next to the analyzer updates to the chosen prompt’s name. This selection applies only to the current run.
 
 Prompt Actions
 - Edit: Opens a modal to view and edit the selected file.
@@ -55,6 +57,7 @@ Custom Analyzers (Optional)
 Rendering Notes
 - Outputs display as formatted Markdown (headings, lists, tables, code) with syntax highlighting.
 - The results pane uses a light theme (black text on white) for readability, even if the OS/browser is in dark mode.
+- Server‑side normalization fixes tables that were returned inside code fences, so they render as real tables.
 
 Where Files Are Written
 - Job artifacts: `output/jobs/<jobId>/...`

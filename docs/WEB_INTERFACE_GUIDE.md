@@ -34,10 +34,12 @@ Submitting an Analysis
 
 2) Select Analyzers and Prompts
 - Stage A, Stage B, and Final analyzers appear in three columns
-- Each analyzer has a prompt template dropdown populated via /api/prompt-options
-- “Edit” opens the prompt editor modal to view/update template content under the prompts/ directory (server-side validation enforces required variables per stage)
-- “Delete” removes the currently selected prompt file for that analyzer
-- “Delete All Prompts” is available inside the editor modal and removes all prompt files under prompts/ (dangerous)
+ - By default, prompt dropdowns are hidden. Enable the “Advanced” toggle to reveal them.
+ - Dropdowns only appear for analyzers that have more than one prompt option (populated via /api/prompt-options).
+ - Selecting a different prompt updates the analyzer label to the chosen prompt’s name and applies only to the current run.
+ - “Edit” opens the prompt editor modal to view/update template content under the prompts/ directory (server-side validation enforces required variables per stage)
+ - “Delete” removes the currently selected prompt file for that analyzer
+ - “Delete All Prompts” is available inside the editor modal and removes all prompt files under prompts/ (dangerous)
 
 API Key in Header
 - At the top of the page, enter “Your OpenAI API Key” to use a session-scoped key.
@@ -109,7 +111,7 @@ What You Should See
 - Analyzer tiles flip to “In Process” quickly after submission
 - Tiles flip to “Completed” with time and tokens on finish
 - Once Final is done, the Final tab shows Meeting Notes and Composite Note (combined or individually if only one is selected)
- - The results pane renders Markdown (headings, lists, tables, code) with a light background for readability.
+ - The results pane renders Markdown (headings, lists, tables, code) with a light background for readability. Tables are normalized server‑side even when returned inside code fences.
 
 API Reference (Web UI)
 - POST /api/analyze

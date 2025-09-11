@@ -68,6 +68,28 @@
     if (!meta) return false; // default to built-in if unknown
     return meta.isBuiltIn === false;
   }
+  // Detect duplicate-like customs relative to built-ins (normalized name compare)
+  function computeHidden() {
+    const hidden = { stageA: new Set(), stageB: new Set(), final: new Set() };
+    function normSlug(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+    const byStage = { stageA: [], stageB: [], final: [] };
+    Object.values(analyzersBySlug || {}).forEach(a => {
+      if (!a || !a.slug || !a.stage) return;
+      byStage[a.stage] = byStage[a.stage] || [];
+      byStage[a.stage].push(a);
+    });
+    [ 'stageA', 'stageB', 'final' ].forEach(stage => {
+      const builtins = (byStage[stage] || []).filter(a => a.isBuiltIn).map(a => a.slug);
+      const customs  = (byStage[stage] || []).filter(a => !a.isBuiltIn).map(a => a.slug);
+      const nb = builtins.map(normSlug);
+      customs.forEach(cs => {
+        const ncs = normSlug(cs);
+        const dup = nb.some((bn) => ncs === bn || (ncs.length >= 4 && (bn.includes(ncs) || ncs.includes(bn))));
+        if (dup) hidden[stage].add(cs);
+      });
+    });
+    return hidden;
+  }
   // Results cache
   // - perAnalyzer: store markdown per analyzer for Stage A/B
   // - finalDocs: store markdown for Final outputs separately
@@ -146,18 +168,26 @@
     // Decide whether to show advanced controls (prompt select) and only if >1 options
     const adv = !!(el.optAdvanced && el.optAdvanced() && el.optAdvanced().checked);
     const showSelect = adv && files.length > 1;
-    // Derive the currently selected file name for label
+    // Derive the currently selected file name for label (prefer isDefault, then defaultPath, then first)
+    const baseName = (s) => {
+      try {
+        const b = String(s || '').split('/').pop() || '';
+        return b.replace(/\.(md|markdown)$/i, '');
+      } catch { return String(s || ''); }
+    };
     let selectedName = '';
     try {
-      const m = files.find((f) => String(f.path) === String(defaultPath));
-      selectedName = (m && m.name) || (files[0] && files[0].name) || '';
+      const byDefault = files.find((f) => !!f.isDefault);
+      const byPath = files.find((f) => String(f.path) === String(defaultPath));
+      const pick = byDefault || byPath || files[0] || null;
+      selectedName = baseName((pick && (pick.name || pick.path)) || '');
     } catch {}
 
     return `
       <div class="flex items-center gap-2 p-2 border rounded">
         <label class="flex items-center gap-2 w-2/5">
           <input type="checkbox" id="${idBase}-chk" class="analyzerChk accent-blue-600" data-stage="${stageKey}" data-name="${analyzerName}" checked />
-          <span class="text-sm">${analyzerName.replace(/_/g, " ")}</span>
+          <span id="${idBase}-analyzerLabel" class="text-sm">${analyzerName.replace(/_/g, " ")}</span>
         </label>
         <div class="flex items-center gap-2 w-3/5">
           ${showSelect ? `
@@ -188,30 +218,6 @@
       analyzersBySlug = {};
     }
 
-    // Helper: compute hidden slugs that look like built-ins (cosmetic differences)
-    function normSlug(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
-    function computeHidden() {
-      const hidden = { stageA: new Set(), stageB: new Set(), final: new Set() };
-      // Build per-stage lists
-      const byStage = { stageA: [], stageB: [], final: [] };
-      Object.values(analyzersBySlug || {}).forEach(a => {
-        if (!a || !a.slug || !a.stage) return;
-        byStage[a.stage] = byStage[a.stage] || [];
-        byStage[a.stage].push(a);
-      });
-      [ 'stageA', 'stageB', 'final' ].forEach(stage => {
-        const builtins = (byStage[stage] || []).filter(a => a.isBuiltIn).map(a => a.slug);
-        const customs  = (byStage[stage] || []).filter(a => !a.isBuiltIn).map(a => a.slug);
-        const nb = builtins.map(normSlug);
-        customs.forEach(cs => {
-          const ncs = normSlug(cs);
-          // Hide if identical after normalization OR substring in either direction for meaningful lengths
-          const dup = nb.some((bn) => ncs === bn || (ncs.length >= 4 && (bn.includes(ncs) || ncs.includes(bn))));
-          if (dup) hidden[stage].add(cs);
-        });
-      });
-      return hidden;
-    }
     const hiddenSlugs = computeHidden();
 
     const stageA = promptOptions.stageA || {};
@@ -277,10 +283,14 @@
     qsa('.promptSelect').forEach((sel) => {
       sel.addEventListener('change', (e) => {
         const s = e.currentTarget;
-        const opt = s.options && s.options[s.selectedIndex];
         const id = String(s.id || '').replace(/-prompt$/, '');
         const lab = qs(`#${id}-promptName`);
-        if (lab && opt) lab.textContent = opt.textContent || '';
+        const val = decodeURIComponent(s.value || '');
+        const name = (val.split('/').pop() || '').replace(/\.(md|markdown)$/i, '');
+        if (lab) lab.textContent = name || '';
+        // Also update the analyzer label text to reflect the selected prompt
+        const analyzerLab = qs(`#${id}-analyzerLabel`);
+        if (analyzerLab) analyzerLab.textContent = name || analyzerLab.textContent;
       });
     });
 
@@ -307,62 +317,7 @@
       });
     });
 
-    // Wire select all/none buttons
-    el.selectAllBtns().forEach((b) =>
-      b.addEventListener("click", () => toggleStageSelection(b.getAttribute("data-sel"), true))
-    );
-    el.deselectAllBtns().forEach((b) =>
-      b.addEventListener("click", () => toggleStageSelection(b.getAttribute("data-sel"), false))
-    );
-
-    // Wire "Add" buttons in stage headers
-    qsa(".addAnalyzer").forEach((b) => {
-      b.addEventListener("click", () => openAnalyzerCrud(b.getAttribute("data-stage")));
-    });
-
-    // Wire "Rescan" buttons in stage headers
-    qsa(".rescanAnalyzers").forEach((b) => {
-      b.addEventListener("click", async () => {
-        const stage = b.getAttribute("data-stage");
-        try {
-          const res = await window.API.rescanAnalyzers(stage);
-          // Refresh options and re-render list
-          const options = await window.API.getPromptOptions();
-          await renderAnalyzerLists(options);
-          // Optional: display a quick status
-          if (res && res.summary) {
-            console.debug("Rescan summary", res.summary);
-          }
-        } catch (e) {
-          alert("Rescan failed: " + (e.message || e));
-        }
-      });
-    });
-
-    // Wire "Cleanup" buttons: detect custom slugs similar to built-ins and delete them
-    qsa(".cleanupDuplicates").forEach((b) => {
-      b.addEventListener("click", async () => {
-        try {
-          // Recompute hidden set as duplicates list
-          const dups = computeHidden();
-          const stage = b.getAttribute("data-stage");
-          const toDelete = Array.from((dups[stage] || new Set()));
-          if (!toDelete.length) {
-            alert("No duplicates found for this stage.");
-            return;
-          }
-          if (!confirm(`Delete ${toDelete.length} duplicate analyzer(s)?`)) return;
-          for (const slug of toDelete) {
-            try { await window.API.deleteAnalyzer(slug); } catch {}
-          }
-          const options = await window.API.getPromptOptions();
-          await renderAnalyzerLists(options);
-          alert("Cleanup complete.");
-        } catch (e) {
-          alert("Cleanup failed: " + (e.message || e));
-        }
-      });
-    });
+    // Header buttons moved to wireStaticHandlers() to avoid duplicate bindings
   }
 
   function toggleStageSelection(stageKey, checked) {
@@ -793,6 +748,39 @@
     if (el.createAnalyzerBtn()) {
       el.createAnalyzerBtn().addEventListener("click", createAnalyzerSubmit);
     }
+    // Static header buttons (bind once)
+    qsa(".addAnalyzer").forEach((b) => {
+      b.onclick = () => openAnalyzerCrud(b.getAttribute("data-stage"));
+    });
+    qsa(".rescanAnalyzers").forEach((b) => {
+      b.onclick = async () => {
+        const stage = b.getAttribute("data-stage");
+        try {
+          await window.API.rescanAnalyzers(stage);
+          const options = await window.API.getPromptOptions();
+          await renderAnalyzerLists(options);
+        } catch (e) {
+          alert("Rescan failed: " + (e.message || e));
+        }
+      };
+    });
+    qsa(".cleanupDuplicates").forEach((b) => {
+      b.onclick = async () => {
+        try {
+          const dups = computeHidden();
+          const stage = b.getAttribute("data-stage");
+          const toDelete = Array.from((dups[stage] || new Set()));
+          if (!toDelete.length) { alert("No duplicates found for this stage."); return; }
+          if (!confirm(`Delete ${toDelete.length} duplicate analyzer(s)?`)) return;
+          for (const slug of toDelete) { try { await window.API.deleteAnalyzer(slug); } catch {} }
+          const options = await window.API.getPromptOptions();
+          await renderAnalyzerLists(options);
+          alert("Cleanup complete.");
+        } catch (e) {
+          alert("Cleanup failed: " + (e.message || e));
+        }
+      };
+    });
     // Advanced toggle re-render
     if (el.optAdvanced && el.optAdvanced()) {
       el.optAdvanced().addEventListener('change', () => {
