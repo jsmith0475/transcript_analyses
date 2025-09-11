@@ -10,6 +10,9 @@ Features
 - Redis‑backed job status and Socket.IO live updates
 - REST API for UI and automation
 
+How To Use (User‑Focused)
+- See HOW_TO_USE.md for a step‑by‑step user guide (API key in‑app, choosing analyzers/prompts, running, and exporting results).
+
 Requirements
 - Docker and Docker Compose (recommended), or
 - Python 3.11+, Redis 7+ (for local dev without Docker)
