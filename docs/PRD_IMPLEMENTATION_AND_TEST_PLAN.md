@@ -71,9 +71,9 @@ This plan formalizes deliverables, fills PRD gaps (schemas, contracts, metrics),
 4.1 Environment Variables (.env)
 - OPENAI_API_KEY=...
 - OPENAI_BASE_URL (optional; defaults to OpenAI)
-- OPENAI_MODEL_STAGE_A=gpt-4o-mini
-- OPENAI_MODEL_STAGE_B=gpt-4o-mini
-- OPENAI_MODEL_FINAL=gpt-4o-mini
+ - OPENAI_MODEL_STAGE_A=gpt-5-nano
+ - OPENAI_MODEL_STAGE_B=gpt-5-nano
+ - OPENAI_MODEL_FINAL=gpt-5-nano
 - OPENAI_TEMPERATURE=0.2
 - APP_HOST=0.0.0.0
 - APP_PORT=5001
@@ -85,7 +85,7 @@ This plan formalizes deliverables, fills PRD gaps (schemas, contracts, metrics),
 - LIVE_MODE=true  (if false, a dry-run stub can be used in certain tests)
 
 4.2 Model Policy
-- Default fast path: gpt-4o-mini for all analyzers to meet throughput/cost targets.
+ - Default fast path: gpt-5-nano for all analyzers to meet throughput/cost targets.
 - Optional quality path: allow per-stage overrides (Stage B/Final can use gpt-4o).
 - Strict token budgeting: prompts trimmed and context summarized when needed.
 
@@ -471,7 +471,7 @@ Security
 - Web UI test: python scripts/test_web_ui.py
 - Monitor pipeline: python scripts/monitor_pipeline.py
 
-Ensure .env has OPENAI_API_KEY and LIVE_MODE=true. Use gpt-4o-mini by default for cost/speed.
+Ensure .env has OPENAI_API_KEY and LIVE_MODE=true. Use gpt-5-nano by default for cost/speed.
 
 -------------------------------------------------------------------------------
 

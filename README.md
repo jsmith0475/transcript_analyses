@@ -35,7 +35,7 @@ Environment and API Key
   - If a server default key is configured, the input box is prefilled with dots (masked) to indicate it’s in use. Delete the dots and paste your own key to override.
 
 - Optional environment variables:
-  - `OPENAI_MODEL` (default: `gpt-4o-mini`; compose overrides to `gpt-5` if available)
+  - `OPENAI_MODEL` (default: `gpt-5-nano`)
   - `REDIS_URL` (default: `redis://localhost:6379`)
 
 Quick Start (Docker)

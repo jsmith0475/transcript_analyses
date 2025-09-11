@@ -46,7 +46,7 @@ Architecture and Data Flow (Aligned to PRD)
   - Single-page UI (index.html) with three-column analyzer selection + results tabs.
   - Socket.IO client for progress events; live updates; markdown rendering (Marked + Highlight.js).
 - LLM:
-  - OpenAI models (default gpt-4o-mini; optional GPT-5 if enabled).
+  - OpenAI models (default gpt-5-nano; configurable via OPENAI_MODEL).
   - Token budgeting + chunking for long transcripts; retries; timeout.
 - Data Flow:
   1) Client submits transcript (text or upload), config, selected analyzers.
@@ -99,7 +99,7 @@ Storage
 
 LLM Strategy and Token Budgeting
 - Provider: OpenAI; API key from env OPENAI_API_KEY.
-- Model: default gpt-4o-mini (configurable OPENAI_MODEL); support GPT-5 using text_verbosity and reasoning_effort.
+- Model: default gpt-5-nano (configurable OPENAI_MODEL); supports GPT-5 Responses API with text_verbosity and reasoning_effort.
 - Retry/Timeout: max_retries=3, timeout=120s (configurable).
 - Stage A: Each analyzer uses only {transcript}. For long inputs:
   - Chunk transcript (config: chunk_size=4000, overlap=400). Run analyzer per chunk and summarize if needed, or pre-summarize transcript into bounded length for analyzers requiring full context.
@@ -247,7 +247,7 @@ Reliability and Error Tests
 
 Cost Guardrails
 - Test profiles:
-  - DEV_REAL_SMALL: OPENAI_MODEL=gpt-4o-mini, llm.max_tokens=800, processing.stage_b_context_token_budget=2000, short transcripts.
+  - DEV_REAL_SMALL: OPENAI_MODEL=gpt-5-nano, llm.max_tokens=800, processing.stage_b_context_token_budget=2000, short transcripts.
   - DEV_FAST_LOCAL: mock completions for unit tests.
 - Nightly e2e limited to N jobs, small inputs; dynamic sampling of analyzers.
 
@@ -334,7 +334,7 @@ Risk Register and Mitigations
 Environment and Configuration Matrix
 - .env keys (examples; see src/config.py):
   - OPENAI_API_KEY=...
-  - OPENAI_MODEL=gpt-4o-mini
+  - OPENAI_MODEL=gpt-5-nano
   - TRANSCRIPT_ANALYZER_STAGE_B_CONTEXT_TOKEN_BUDGET=8000
   - TRANSCRIPT_ANALYZER_STAGE_B_MIN_TOKENS_PER_ANALYZER=500
   - TRANSCRIPT_ANALYZER_FINAL_CONTEXT_TOKEN_BUDGET=0

@@ -14,7 +14,7 @@ services:
     env_file:
       - .env
     environment:
-      - OPENAI_MODEL=gpt-5
+      - OPENAI_MODEL=gpt-5-nano
       - REDIS_URL=redis://redis:6379
       - FLASK_APP=src.app
       - EVENTLET_NO_GREENDNS=yes
@@ -39,7 +39,7 @@ services:
     env_file:
       - .env
     environment:
-      - OPENAI_MODEL=gpt-5
+      - OPENAI_MODEL=gpt-5-nano
       - REDIS_URL=redis://redis:6379
       - EVENTLET_NO_GREENDNS=yes
     volumes:

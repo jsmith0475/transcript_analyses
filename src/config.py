@@ -16,7 +16,7 @@ load_dotenv()
 class LLMConfig(BaseModel):
     """Configuration for LLM integration."""
     provider: str = "openai"
-    model: str = Field(default="gpt-4o-mini")
+    model: str = Field(default="gpt-5-nano")
     api_key: Optional[str] = None
     api_base: str = "https://api.openai.com/v1"
     max_tokens: int = 8000
@@ -41,7 +41,7 @@ class LLMConfig(BaseModel):
     @validator('model')
     def validate_model(cls, v):
         if not v:
-            v = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
+            v = os.getenv('OPENAI_MODEL', 'gpt-5-nano')
         return v
 
 
