@@ -1,4 +1,10 @@
 <prompt>
+  <response_header_required>
+        At the very start of your response, output exactly one line:
+        Definition: <one sentence (≤ 20 words) describing this analysis in plain English>
+        Then leave one blank line and continue.
+  </response_header_required>
+
 This is the {context} and {transcript} from a meeting. Please perform the following tasks:
 
 Attendee List: Confirm and provide a list of attendees from the transcript and attendance list.
@@ -24,4 +30,4 @@ Since these notes will be used in my Obsidian system as my "second brain," link 
  <inputs>
     <context>{{ context }}</context>
     <transcript optional="true">{{ transcript }}</transcript>
-  </inputs>
+</inputs>
