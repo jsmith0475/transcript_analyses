@@ -198,19 +198,7 @@ def cleanup_registry() -> Dict[str, Any]:
         if not stage_map:
             continue
         to_delete = set()
-        # 1) Remove entries whose slug is built-in
-        for slug in list(stage_map.keys()):
-            if is_builtin_slug(slug):
-                to_delete.add(slug)
-        # 2) Remove entries pointing to built-in files
-        for slug, meta in list(stage_map.items()):
-            try:
-                path = str(meta.get("defaultPromptPath", ""))
-                name = Path(path).name.lower()
-                if name in BUILTIN_FILES.get(sk, set()):
-                    to_delete.add(slug)
-            except Exception:
-                continue
+        # Keep built-ins and their files; only dedupe conflicting customs
         # 3) De-duplicate by file path: keep canonical slug from filename
         path_to_slugs: Dict[str, list] = {}
         for slug, meta in stage_map.items():
@@ -268,16 +256,8 @@ def rebuild_registry_from_prompts() -> Dict[str, Any]:
         try:
             for p in sorted(dir_path.glob("*.md")):
                 name_l = p.name.lower()
-                # Skip built-in prompt files by filename
-                if name_l in BUILTIN_FILES.get(sk, set()):
-                    skipped[sk].append({"path": str(p), "reason": "builtin_file"})
-                    continue
                 # Derive slug from filename
                 slug = _slug_from_filename(p.name)
-                # Skip built-in slugs outright
-                if is_builtin_slug(slug):
-                    skipped[sk].append({"slug": slug, "reason": "builtin_slug"})
-                    continue
                 # Validate variables
                 ok, err = validate_prompt_file_for_stage(p, sk)
                 if not ok:
@@ -295,11 +275,17 @@ def rebuild_registry_from_prompts() -> Dict[str, Any]:
                 while final_slug in new_reg[sk]:
                     final_slug = f"{slug}_{i}"
                     i += 1
-                # Register
-                new_reg[sk][final_slug] = {
+                # Register (mark built-ins for traceability)
+                meta = {
                     "displayName": final_slug.replace("_", " ").title(),
                     "defaultPromptPath": str(p),
                 }
+                try:
+                    if is_builtin_slug(final_slug) or (name_l in BUILTIN_FILES.get(sk, set())):
+                        meta["isBuiltIn"] = True
+                except Exception:
+                    pass
+                new_reg[sk][final_slug] = meta
                 path_used[rp] = final_slug
                 added[sk].append({"slug": final_slug, "path": str(p)})
         except Exception as e:

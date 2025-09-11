@@ -379,7 +379,12 @@ class AppConfig(BaseSettings):
     
     def get_prompt_path(self, analyzer_name: str) -> Path:
         """Get the prompt file path for an analyzer."""
-        # Map analyzer names to prompt files
+        # Prefer registry/config-provided prompt file first
+        analyzer_config = self.get_analyzer_config(analyzer_name)
+        if analyzer_config.prompt_file:
+            return analyzer_config.prompt_file
+
+        # Fallback map for legacy built-ins
         prompt_mapping = {
             'say_means': 'prompts/stage a transcript analyses/1 say-means.md',
             'perspective_perception': 'prompts/stage a transcript analyses/2 perspective-perception.md',
@@ -392,15 +397,22 @@ class AppConfig(BaseSettings):
             'meeting_notes': 'prompts/final output stage/2 meeting notes.md',
             'composite_note': 'prompts/final output stage/1 composite note.md',
         }
-        
+
         if analyzer_name in prompt_mapping:
             return Path(prompt_mapping[analyzer_name])
-        
-        # Check if custom prompt path is configured
-        analyzer_config = self.get_analyzer_config(analyzer_name)
-        if analyzer_config.prompt_file:
-            return analyzer_config.prompt_file
-        
+
+        # Attempt to resolve from registry directly as last resort
+        try:
+            from src.analyzers.registry import load_registry, find_slug_stage
+            reg = load_registry()
+            stage_key = find_slug_stage(reg, analyzer_name)
+            if stage_key:
+                path = (reg.get(stage_key) or {}).get(analyzer_name, {}).get('defaultPromptPath')
+                if path:
+                    return Path(path)
+        except Exception:
+            pass
+
         raise ValueError(f"No prompt file configured for analyzer: {analyzer_name}")
     
     def to_dict(self) -> Dict[str, Any]:

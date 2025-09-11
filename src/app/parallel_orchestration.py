@@ -1016,3 +1016,18 @@ def run_parallel_pipeline(job_id: str, payload: Dict[str, Any]) -> None:
             get_notification_manager().pipeline_error(job_id, {"message": str(e)})
         except Exception:
             pass
+@celery.task(name="reload_registry")
+def reload_registry_task() -> Dict[str, Any]:
+    """
+    Rebuild the analyzers registry from the filesystem and refresh worker config.
+    Useful after UI-triggered rescans so the worker sees new/updated prompts
+    without requiring a manual restart.
+    """
+    try:
+        from src.analyzers.registry import rebuild_registry_from_prompts
+        from src.config import reset_config, get_config
+        summary = rebuild_registry_from_prompts()
+        reset_config(); _ = get_config()
+        return {"ok": True, "summary": summary}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}

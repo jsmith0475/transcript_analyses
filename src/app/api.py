@@ -679,6 +679,12 @@ def api_rescan_analyzers():
         # For simplicity, rebuild full registry always to avoid drift
         summary = rebuild_registry_from_prompts()
         reset_config(); _ = get_config()
+        # Also ask the Celery worker to refresh its registry/config
+        try:
+            from src.app.parallel_orchestration import reload_registry_task  # type: ignore
+            reload_registry_task.delay()
+        except Exception:
+            pass
         # Return updated analyzers list
         cfg = get_config()
         reg = load_registry()

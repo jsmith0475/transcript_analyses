@@ -154,6 +154,10 @@ Final Prompt Output Structure for Insights
     - Dates: `YYYY-MM-DD` format (normalize any relative dates)
     - Optional `anchor`: a transcript link token like `#seg-123` to support evidence linking in the UI
 
+Discovery & Rescan
+- At startup, the app scans all prompt folders and registers analyzers from the filesystem. Built‑in analyzer prompts are included in the scan; they are no longer hard‑coded.
+- Use the “Rescan” button (per stage) in the UI to detect new/updated prompt files without restarting. Rescan also refreshes the Celery worker so the pipeline immediately sees the changes.
+
 At runtime, the app fills:
 - `context`: combined analysis results for the stage
 - `transcript`: either raw transcript (Full) or a synthesized summary (Summary), when enabled

@@ -92,13 +92,14 @@ Prompts
   - `prompts/stage a transcript analyses/`
   - `prompts/stage b results analyses/`
   - `prompts/final output stage/`
-- At startup, the app scans these directories and loads available `.md` files.
+- At startup, the app scans these directories and loads available `.md` files. Built‑in analyzer prompts are included in this scan as well, so all analyzers (built‑in and custom) resolve their prompt paths dynamically from the filesystem.
 - From the UI you can:
   - Edit a prompt file (Edit)
   - Delete a selected prompt file (Delete)
   - Reset the editor to a stage‑appropriate template
   - Delete all prompt files (in the editor modal)
   - Advanced prompt selection per analyzer (per‑run only): enable the “Advanced” toggle to reveal a prompt dropdown. Dropdowns only appear when an analyzer has more than one prompt option. Selecting a different prompt updates the label next to the analyzer, and that prompt path is used for this run only.
+  - Rescan analyzers (per stage): rebuilds the analyzer registry from the `prompts/` folders and refreshes both the web app and Celery worker so new/updated prompt files are immediately available without restarting processes.
 
 Running an Analysis
 1) Paste transcript text or choose a file.
@@ -113,6 +114,7 @@ Key Endpoints
 - Health: `/health`
 - API base: `/api`
   - Prompt options: `GET /api/prompt-options`
+  - Rescan analyzers: `POST /api/analyzers/rescan`
   - Get/Save prompt: `GET/POST /api/prompts`
   - Delete prompt file: `DELETE /api/prompts?path=...`
   - Delete all prompts: `DELETE /api/prompts/all`
@@ -127,6 +129,7 @@ Troubleshooting
 
 Development Notes
 - Prompts are git‑tracked by default. The UI can delete them; you can restore from git.
+- Analyzer prompts are dynamically discovered at startup and on “Rescan”. The worker is also refreshed during rescan so you don’t need to restart it to pick up new prompts.
 - `.env` is ignored by git. Never commit your API key.
 
 License
