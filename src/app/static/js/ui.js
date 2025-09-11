@@ -82,6 +82,40 @@
     return String(s).replace(/[^a-zA-Z0-9_-]/g, "_");
   }
 
+  // Normalize LLM markdown so it renders well with tables
+  function normalizeMarkdown(md) {
+    let txt = String(md || "");
+    // Replace fancy dashes to plain hyphen (helps separator rows)
+    txt = txt.replace(/[–—−]/g, '-');
+
+    // Unwrap fenced code blocks that contain a pipe table
+    try {
+      const fence = /```[^\n]*\n([\s\S]*?)\n```/g;
+      txt = txt.replace(fence, (m, body) => {
+        const b = (body || '').trim();
+        const lines = b.split(/\r?\n/);
+        if (lines.length < 2) return m;
+        const h = lines[0] || '';
+        // Require header to look like a table row
+        if (!/^\s*\|.*\|\s*$/.test(h)) return m;
+        // Repair/ensure separator
+        let sep = lines[1] || '';
+        const colCount = h.split('|').filter((x) => x.trim()).length;
+        const canonical = '|' + Array(colCount).fill('---').join('|') + '|';
+        if (!/-{3,}/.test(sep)) lines[1] = canonical;
+        // Drop the fences
+        return '\n' + lines.join('\n') + '\n';
+      });
+    } catch {}
+
+    // Dedent lines that start with a pipe to avoid them being read as code blocks
+    try {
+      txt = txt.replace(/^[ \t]{4,}(\|)/gm, '$1');
+    } catch {}
+
+    return txt;
+  }
+
   // Normalize backend stage keys to UI stage keys used for tile IDs
   function normalizeStageKey(stage) {
     const s = String(stage || "").toLowerCase();
@@ -524,10 +558,61 @@
 
   function renderMarkdown(md) {
     try {
-      const html = marked.parse(md || "");
+      const html = marked.parse(normalizeMarkdown(md || ""));
       // Highlight code blocks
       const container = document.createElement("div");
       container.innerHTML = html;
+      // If the LLM wrapped tables in code fences (``` ... ```), unwrap them back to real tables
+      try {
+        Array.from(container.querySelectorAll('pre code')).forEach((block) => {
+          // Normalize dash characters and attempt to coerce a Markdown pipe table
+          const original = (block.textContent || '').trim();
+          let raw = original.replace(/[–—−]/g, '-');
+          const lines = raw.split(/\r?\n/);
+          if (lines.length < 2) return;
+          const header = lines[0] || '';
+          if (!/^\s*\|.*\|\s*$/.test(header)) return; // must start with pipe table row
+          // Count header columns
+          const cols = header.split('|').map(s => s.trim()).filter(Boolean).length;
+          if (cols < 2) return;
+          // Generate a canonical separator line and use it if the current one looks wrong
+          const canonicalSep = '|' + Array(cols).fill('---').join('|') + '|';
+          const sep = (lines[1] || '').replace(/[–—−]/g, '-');
+          const sepLooksOk = /-{3,}/.test(sep) && (sep.split('|').length - 1) >= cols;
+          if (!sepLooksOk) lines[1] = canonicalSep;
+
+          // Re-parse this block as Markdown and replace the <pre> entirely
+          const pre = block.parentElement;
+          const toParse = lines.join('\n');
+          const parsed = marked.parse(toParse);
+          const tmp = document.createElement('div');
+          tmp.innerHTML = parsed;
+          const repl = document.createElement('div');
+          repl.append(...Array.from(tmp.childNodes));
+          if (pre && pre.parentNode) pre.parentNode.replaceChild(repl, pre);
+        });
+      } catch {}
+
+      // Post-process tables for better readability and responsiveness
+      try {
+        container.querySelectorAll("table").forEach((tbl) => {
+          // Wrap in a horizontally scrollable container to avoid overflow
+          const wrap = document.createElement('div');
+          wrap.className = 'overflow-x-auto my-3';
+          tbl.parentNode && tbl.parentNode.insertBefore(wrap, tbl);
+          wrap.appendChild(tbl);
+          // Add utility classes for borders and spacing
+          tbl.classList.add('w-full');
+          // Add borders/padding to cells
+          tbl.querySelectorAll('th, td').forEach((cell) => {
+            cell.classList.add('border', 'border-gray-200', 'p-2', 'align-top');
+          });
+          // Slight header background for contrast
+          tbl.querySelectorAll('thead th').forEach((th) => {
+            th.classList.add('bg-slate-50');
+          });
+        });
+      } catch {}
       container.querySelectorAll("pre code").forEach((block) => {
         try {
           hljs.highlightElement(block);

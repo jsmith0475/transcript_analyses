@@ -22,6 +22,7 @@ from src.models import (
     ProcessedTranscript
 )
 from src.llm_client import get_llm_client
+from src.utils.markdown_normalizer import normalize_markdown_tables
 from src.config import get_config
 from src.utils.context_builder import build_fair_combined_context
 from src.app.sockets import log_info
@@ -342,7 +343,11 @@ class BaseAnalyzer(ABC):
                 **(extra_llm_kwargs or {})
             )
             
-            # Parse the response
+            # Normalize markdown (e.g., unwrap code-fenced tables) and parse the response
+            try:
+                response_text = normalize_markdown_tables(response_text)
+            except Exception:
+                pass
             result.raw_output = response_text
             result.token_usage = token_usage
             # Record model actually used
@@ -429,7 +434,11 @@ class BaseAnalyzer(ABC):
                 **(extra_llm_kwargs or {})
             )
             
-            # Parse the response
+            # Normalize markdown (e.g., unwrap code-fenced tables) and parse the response
+            try:
+                response_text = normalize_markdown_tables(response_text)
+            except Exception:
+                pass
             result.raw_output = response_text
             result.token_usage = token_usage
             # Record model actually used
