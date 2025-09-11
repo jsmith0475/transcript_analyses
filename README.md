@@ -15,10 +15,16 @@ Requirements
 - Python 3.11+, Redis 7+ (for local dev without Docker)
 
 Environment and API Key
-- The app uses OpenAI by default. Set `OPENAI_API_KEY` in `.env` (or your shell).
-- Example `.env` (see `.env.template`):
+- The app uses OpenAI by default. You have two ways to provide the API key:
+  1) Server-wide: set `OPENAI_API_KEY` in `.env` (or export in your shell). Example (`.env.template`):
 
-  OPENAI_API_KEY=sk-...your-key...
+     OPENAI_API_KEY=sk-...your-key...
+
+  2) Per-user in the app: at the top of the UI there’s “Your OpenAI API Key”. Paste your key and click Save (optionally Test). This stores a session-scoped key so the server can run without a global key.
+
+  Notes:
+  - The app can start without any key; LLM features won’t work until a key is provided (either method above).
+  - You can Clear your per-user key in the UI to fall back to the server default.
 
 - Optional environment variables:
   - `OPENAI_MODEL` (default: `gpt-4o-mini`; compose overrides to `gpt-5` if available)
@@ -53,7 +59,7 @@ Local Development (without Docker)
 2) Ensure Redis is running locally (or via Docker):
    docker run --rm -p 6379:6379 redis:7-alpine
 
-3) Set environment and run the app:
+3) Set environment and/or use the in‑app key, then run the app:
    export OPENAI_API_KEY=sk-...  # or use .env
    export REDIS_URL=redis://localhost:6379
    export FLASK_APP=src.app
@@ -61,7 +67,7 @@ Local Development (without Docker)
    # or, for full Socket.IO support like prod:
    gunicorn -k eventlet -w 1 -b 0.0.0.0:5000 "src.app:create_app()"
 
-4) Open:
+4) Open and (optionally) set your key in the UI header:
    http://localhost:5000
 
 Prompts
@@ -104,4 +110,3 @@ Development Notes
 
 License
 - Proprietary to your project unless you add a license.
-
