@@ -819,8 +819,26 @@ def api_user_key_status():
     """Return whether a per-user API key is set in the session (masked)."""
     present = bool(session.get('user_api_key'))
     # Also report whether a server-wide default API key is configured (.env)
+    server_present = False
+    server_masked = None
+    server_valid = False
     try:
-        server_present = bool(get_config().llm.api_key)
+        cfg = get_config()
+        if cfg and cfg.llm and cfg.llm.api_key:
+            server_present = True
+            k = cfg.llm.api_key or ""
+            try:
+                server_masked = ("****" + k[-4:]) if len(k) >= 4 else "****"
+            except Exception:
+                server_masked = "****"
+            # Validate server key with a minimal metadata call
+            try:
+                from openai import OpenAI  # lazy import to avoid import cycles
+                _client = OpenAI(api_key=cfg.llm.api_key)
+                _ = _client.models.list()
+                server_valid = True
+            except Exception:
+                server_valid = False
     except Exception:
         server_present = False
     masked = None
@@ -830,7 +848,14 @@ def api_user_key_status():
             masked = ("****" + k[-4:]) if len(k) >= 4 else "****"
         except Exception:
             masked = "****"
-    return jsonify({"ok": True, "present": present, "masked": masked, "serverPresent": server_present})
+    return jsonify({
+        "ok": True,
+        "present": present,
+        "masked": masked,
+        "serverPresent": server_present,
+        "serverMasked": server_masked,
+        "serverValid": server_valid,
+    })
 
 
 @api_bp.post("/user/key")

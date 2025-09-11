@@ -426,11 +426,16 @@
           if (st && st.ok) {
             if (st.present) {
               statusEl.textContent = `Using your key (${st.masked})`;
-              // Do not echo the real key; leave input empty
+            } else if (st.serverPresent) {
+              if (st.serverValid) {
+                const mask = st.serverMasked || '****';
+                statusEl.textContent = `Using server default key (${mask})`;
+                try { if (input && !input.value) input.value = KEY_SENTINEL; } catch {}
+              } else {
+                statusEl.textContent = 'Server API key invalid. Enter your key.';
+              }
             } else {
-              statusEl.textContent = 'Using server default key';
-              // Prefill with sentinel dots if a server default key exists
-              try { if (st.serverPresent && input && !input.value) input.value = KEY_SENTINEL; } catch {}
+              statusEl.textContent = 'No API key set. Enter your key.';
             }
           }
         } catch {}
