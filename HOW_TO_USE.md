@@ -39,7 +39,6 @@ Prompt Actions
 
 Custom Analyzers (Optional)
 - Use the “Add Analyzer” control to create a custom analyzer, either from pasted prompt content (auto‑normalized) or by mapping an existing prompt file to a new slug.
-- “Make Default” sets the analyzer’s selected prompt as its default.
 
 5) Run Analysis
 - Click “Start Analysis”. The app enqueues the job and shows live progress tiles.
@@ -73,4 +72,3 @@ See Also
 - README.md (overview, Docker quick start)
 - docs/WEB_INTERFACE_GUIDE.md (UI details and API reference)
 - docs/USER_GUIDE.md (broader pipeline and CLI usage)
-

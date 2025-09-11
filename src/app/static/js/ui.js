@@ -106,9 +106,6 @@
 
     const custom = isCustomSlug(analyzerName);
     const deleteBtn = `<button class="px-2 py-1 border rounded text-xs text-red-700 deletePromptBtn" data-stage="${stageKey}" data-analyzer="${analyzerName}" title="Delete currently selected prompt file">Delete</button>`;
-    const makeDefaultBtn = custom
-      ? `<button class="px-2 py-1 border rounded text-xs makeDefaultBtn" data-stage="${stageKey}" data-analyzer="${analyzerName}" title="Set selected prompt as default for this analyzer">Make Default</button>`
-      : `<button class="px-2 py-1 border rounded text-xs opacity-40 cursor-not-allowed" disabled title="Default prompt fixed for built-in">Make Default</button>`;
 
     return `
       <div class="flex items-center gap-2 p-2 border rounded">
@@ -122,7 +119,6 @@
           </select>
           <button class="px-2 py-1 border rounded text-xs editPromptBtn" data-stage="${stageKey}" data-analyzer="${analyzerName}" data-path="${encodeURIComponent(defaultPath)}">Edit</button>
           ${deleteBtn}
-          ${makeDefaultBtn}
       </div>
     </div>
     `;
@@ -224,25 +220,7 @@
       });
     });
 
-    // Wire Make Default (custom only)
-    qsa(".makeDefaultBtn").forEach((btn) => {
-      btn.addEventListener("click", async (e) => {
-        const stage = e.currentTarget.getAttribute("data-stage");
-        const analyzer = e.currentTarget.getAttribute("data-analyzer");
-        const selectEl = qs(`#${stage}-${sanitizeIdPart(analyzer)}-prompt`);
-        const selectedPath = decodeURIComponent(selectEl.value || "");
-        if (!selectedPath) return;
-        try {
-          await window.API.updateAnalyzer(analyzer, { defaultPromptPath: selectedPath });
-          alert("Default prompt updated.");
-          // Refresh prompt options to reflect new default
-          const options = await window.API.getPromptOptions();
-          await renderAnalyzerLists(options);
-        } catch (err) {
-          alert("Failed to update default prompt: " + (err.message || err));
-        }
-      });
-    });
+    // (removed) Make Default handler
 
     // Wire Delete (deletes the selected prompt file for this analyzer)
     qsa('.deletePromptBtn').forEach((btn) => {
