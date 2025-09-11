@@ -36,7 +36,7 @@ Quick Start (Docker)
    # edit .env and set OPENAI_API_KEY
 
 2) Start services (app, worker, redis):
-   docker-compose up --build
+   docker-compose up -d --build
 
 3) Open the UI:
    http://localhost:5001
