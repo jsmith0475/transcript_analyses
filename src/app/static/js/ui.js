@@ -54,6 +54,8 @@
     analyzerPromptContent: () => qs("#analyzerPromptContent"),
     createAnalyzerBtn: () => qs("#createAnalyzerBtn"),
     analyzerCrudStatus: () => qs("#analyzerCrudStatus"),
+    // Advanced toggle
+    optAdvanced: () => qs('#optAdvanced'),
   };
 
   let promptOptions = null; // loaded from API.getPromptOptions()
@@ -141,6 +143,16 @@
     const custom = isCustomSlug(analyzerName);
     const deleteBtn = `<button class="px-2 py-1 border rounded text-xs text-red-700 deletePromptBtn" data-stage="${stageKey}" data-analyzer="${analyzerName}" title="Delete currently selected prompt file">Delete</button>`;
 
+    // Decide whether to show advanced controls (prompt select) and only if >1 options
+    const adv = !!(el.optAdvanced && el.optAdvanced() && el.optAdvanced().checked);
+    const showSelect = adv && files.length > 1;
+    // Derive the currently selected file name for label
+    let selectedName = '';
+    try {
+      const m = files.find((f) => String(f.path) === String(defaultPath));
+      selectedName = (m && m.name) || (files[0] && files[0].name) || '';
+    } catch {}
+
     return `
       <div class="flex items-center gap-2 p-2 border rounded">
         <label class="flex items-center gap-2 w-2/5">
@@ -148,9 +160,12 @@
           <span class="text-sm">${analyzerName.replace(/_/g, " ")}</span>
         </label>
         <div class="flex items-center gap-2 w-3/5">
-          <select id="${idBase}-prompt" class="w-full border rounded p-1 text-sm">
+          ${showSelect ? `
+          <select id="${idBase}-prompt" class="promptSelect w-full border rounded p-1 text-sm">
             ${optionsHtml}
           </select>
+          <span id="${idBase}-promptName" class="text-xs text-gray-500">${selectedName}</span>
+          ` : ''}
           <button class="px-2 py-1 border rounded text-xs editPromptBtn" data-stage="${stageKey}" data-analyzer="${analyzerName}" data-path="${encodeURIComponent(defaultPath)}">Edit</button>
           ${deleteBtn}
       </div>
@@ -246,11 +261,26 @@
       btn.addEventListener("click", async (e) => {
         const stage = e.currentTarget.getAttribute("data-stage");
         const analyzer = e.currentTarget.getAttribute("data-analyzer");
-        const selectEl = qs(
-          `#${stage}-${sanitizeIdPart(analyzer)}-prompt`
-        );
-        const selectedPath = decodeURIComponent(selectEl.value);
+        let selectedPath = '';
+        const selectEl = qs(`#${stage}-${sanitizeIdPart(analyzer)}-prompt`);
+        if (selectEl && selectEl.value) {
+          selectedPath = decodeURIComponent(selectEl.value);
+        } else {
+          // Fall back to default path in data-path attr
+          selectedPath = decodeURIComponent(e.currentTarget.getAttribute('data-path') || '');
+        }
         openPromptEditor({ path: selectedPath, analyzer });
+      });
+    });
+
+    // Wire prompt select change: update filename label and keep selection
+    qsa('.promptSelect').forEach((sel) => {
+      sel.addEventListener('change', (e) => {
+        const s = e.currentTarget;
+        const opt = s.options && s.options[s.selectedIndex];
+        const id = String(s.id || '').replace(/-prompt$/, '');
+        const lab = qs(`#${id}-promptName`);
+        if (lab && opt) lab.textContent = opt.textContent || '';
       });
     });
 
@@ -762,6 +792,12 @@
     }
     if (el.createAnalyzerBtn()) {
       el.createAnalyzerBtn().addEventListener("click", createAnalyzerSubmit);
+    }
+    // Advanced toggle re-render
+    if (el.optAdvanced && el.optAdvanced()) {
+      el.optAdvanced().addEventListener('change', () => {
+        try { renderAnalyzerLists(promptOptions); } catch {}
+      });
     }
   }
 
