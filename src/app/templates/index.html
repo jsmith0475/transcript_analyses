@@ -417,15 +417,20 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       // User API key wiring
+      const KEY_SENTINEL = '••••••••';
       (async () => {
         try {
           const st = await window.API.userKeyStatus();
           const statusEl = document.getElementById('userApiKeyStatus');
+          const input = document.getElementById('userApiKeyInput');
           if (st && st.ok) {
             if (st.present) {
               statusEl.textContent = `Using your key (${st.masked})`;
+              // Do not echo the real key; leave input empty
             } else {
               statusEl.textContent = 'Using server default key';
+              // Prefill with sentinel dots if a server default key exists
+              try { if (st.serverPresent && input && !input.value) input.value = KEY_SENTINEL; } catch {}
             }
           }
         } catch {}
@@ -438,7 +443,7 @@
       if (saveBtn && input) {
         saveBtn.addEventListener('click', async () => {
           const v = (input.value || '').trim();
-          if (!v) { statusEl.textContent = 'Enter a key.'; return; }
+          if (!v || v === KEY_SENTINEL) { statusEl.textContent = 'Enter a key.'; return; }
           try {
             const res = await window.API.userKeySet(v);
             if (res && res.ok) {
@@ -458,7 +463,13 @@
           try {
             const v = (input.value || '').trim();
             statusEl.textContent = 'Testing…';
-            const res = await window.API.userKeyValidate(v || undefined);
+            if (!v || v === KEY_SENTINEL) {
+              // Only validates per-user keys; indicate server default is in use
+              statusEl.textContent = 'Using server key. Enter a key to test here.';
+              setTimeout(() => { statusEl.textContent = '' }, 3000);
+              return;
+            }
+            const res = await window.API.userKeyValidate(v);
             if (res && res.ok) {
               statusEl.textContent = 'Key is valid.';
             } else {

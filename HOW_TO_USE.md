@@ -18,6 +18,7 @@ Prerequisites
 
 2) Provide Your API Key
 - In the page header, use “Your OpenAI API Key”:
+  - If a server default key is configured, the field is prefilled with dots to indicate it’s in use.
   - Paste your key → Save (optional: Test)
   - You can Clear it later to fall back to the server default key.
 - Alternatively, set `OPENAI_API_KEY` in `.env` before starting the app.

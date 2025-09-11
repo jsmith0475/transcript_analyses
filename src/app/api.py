@@ -818,6 +818,11 @@ def api_config():
 def api_user_key_status():
     """Return whether a per-user API key is set in the session (masked)."""
     present = bool(session.get('user_api_key'))
+    # Also report whether a server-wide default API key is configured (.env)
+    try:
+        server_present = bool(get_config().llm.api_key)
+    except Exception:
+        server_present = False
     masked = None
     if present:
         try:
@@ -825,7 +830,7 @@ def api_user_key_status():
             masked = ("****" + k[-4:]) if len(k) >= 4 else "****"
         except Exception:
             masked = "****"
-    return jsonify({"ok": True, "present": present, "masked": masked})
+    return jsonify({"ok": True, "present": present, "masked": masked, "serverPresent": server_present})
 
 
 @api_bp.post("/user/key")

@@ -32,6 +32,7 @@ Environment and API Key
   Notes:
   - The app can start without any key; LLM features won’t work until a key is provided (either method above).
   - You can Clear your per-user key in the UI to fall back to the server default.
+  - If a server default key is configured, the input box is prefilled with dots (masked) to indicate it’s in use. Delete the dots and paste your own key to override.
 
 - Optional environment variables:
   - `OPENAI_MODEL` (default: `gpt-4o-mini`; compose overrides to `gpt-5` if available)
