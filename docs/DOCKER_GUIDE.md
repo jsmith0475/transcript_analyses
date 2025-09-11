@@ -187,8 +187,8 @@ CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--reload"]
 ### Basic Operations
 
 ```bash
-# Build and start all services
-docker compose up -d
+# First-time build and start all services
+docker compose up -d --build
 
 # View running containers
 docker compose ps
@@ -212,14 +212,14 @@ docker compose down -v
 
 ```bash
 # Python-only code changes (fast):
-docker-compose restart app
-docker-compose restart worker   # if Celery code changed too
+docker compose restart app
+docker compose restart worker   # if Celery code changed too
 
 # Rebuild and restart after Dockerfile/static changes:
-docker-compose up -d --build
+docker compose up -d --build
 
 # Gunicorn graceful reload (no full restart):
-docker-compose exec app kill -HUP 1
+docker compose exec app kill -HUP 1
 
 # Execute command in running container
 docker compose exec app python -c "from src.config import get_config; print(get_config())"

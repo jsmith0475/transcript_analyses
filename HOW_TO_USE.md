@@ -52,6 +52,10 @@ Custom Analyzers (Optional)
 - Insights: After Final completes, open the Insights panel to filter Actions, Decisions, and Risks or export JSON/CSV/Markdown.
 - Download/Copy: Use the buttons above the results area to download or copy the current tab content.
 
+Rendering Notes
+- Outputs display as formatted Markdown (headings, lists, tables, code) with syntax highlighting.
+- The results pane uses a light theme (black text on white) for readability, even if the OS/browser is in dark mode.
+
 Where Files Are Written
 - Job artifacts: `output/jobs/<jobId>/...`
 - Final insights: `output/jobs/<jobId>/final/insight_dashboard.{json,md,csv}`

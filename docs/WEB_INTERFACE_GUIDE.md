@@ -7,16 +7,18 @@ Last Updated: 2025-09-10
 Overview
 This guide explains how to use the web UI, how progress is reported in real time, and how final results are displayed and exported. It reflects the current Docker-based setup, Celery-backed orchestration, and recent fixes to progress consistency and Final tab rendering.
 
-Quick Start (Docker-Compose)
+Quick Start (Docker)
 Prerequisites
-- Docker and Docker Compose installed
+- Docker (Compose v2) installed
 - .env file with a valid OPENAI_API_KEY (see .env.template)
 
 Run
-- Start/Restart:
-  docker-compose up -d
-  docker-compose restart worker
-  docker-compose restart app
+- First time:
+  cp .env.template .env
+  docker compose up -d --build
+- Subsequent restarts:
+  docker compose restart worker
+  docker compose restart app
 - Web UI: http://localhost:5001
 - Health: http://localhost:5001/api/health
 
@@ -34,6 +36,12 @@ Submitting an Analysis
 - Stage A, Stage B, and Final analyzers appear in three columns
 - Each analyzer has a prompt template dropdown populated via /api/prompt-options
 - “Edit” opens the prompt editor modal to view/update template content under the prompts/ directory (server-side validation enforces required variables per stage)
+- “Delete” removes the currently selected prompt file for that analyzer
+- “Delete All Prompts” is available inside the editor modal and removes all prompt files under prompts/ (dangerous)
+
+API Key in Header
+- At the top of the page, enter “Your OpenAI API Key” to use a session-scoped key.
+- If the server already has a valid key in .env, the field shows dots (masked) and the status indicates the server key is in use. Delete the dots and paste your key to override for your session.
 
 3) Stage B Options
 - Include Original Transcript: toggle
@@ -101,6 +109,7 @@ What You Should See
 - Analyzer tiles flip to “In Process” quickly after submission
 - Tiles flip to “Completed” with time and tokens on finish
 - Once Final is done, the Final tab shows Meeting Notes and Composite Note (combined or individually if only one is selected)
+ - The results pane renders Markdown (headings, lists, tables, code) with a light background for readability.
 
 API Reference (Web UI)
 - POST /api/analyze
@@ -179,10 +188,10 @@ Troubleshooting
 - UI not updating or Final tab blank:
   - Hard refresh the browser (Cmd+Shift+R / Ctrl+F5)
   - Ensure both worker and app are running:
-    docker-compose ps
+    docker compose ps
   - Verify health:
     curl http://localhost:5001/api/health
-  - Check logs: docker-compose logs -f worker app
+  - Check logs: docker compose logs -f worker app
 
 - Status stuck at "processing":
   - Ensure no errors in worker logs (look for analyzer exceptions)

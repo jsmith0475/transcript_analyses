@@ -266,7 +266,7 @@ Local Dev (without Docker)
 - Open UI: http://localhost:5000
 
 Docker Compose
-- docker-compose up --build
+- docker compose up -d --build
 - Environment passed via .env; services: web, worker, redis.
 - Reverse proxy/HTTPS to be configured for production.
 

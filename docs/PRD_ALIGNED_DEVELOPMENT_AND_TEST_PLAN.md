@@ -88,9 +88,9 @@ This plan operationalizes the PRD into concrete deliverables, milestones, accept
   - CACHE_TTL_HOURS=24
 
 - Start/Restart (Runbook)
-  - docker-compose up -d (first run)
-  - docker-compose restart app (restart web server)
-  - docker-compose restart worker (restart Celery workers)
+  - docker compose up -d --build (first run)
+  - docker compose restart app (restart web server)
+  - docker compose restart worker (restart Celery workers)
   - Confirm at http://localhost:5001
 
 ---
@@ -346,9 +346,9 @@ This plan operationalizes the PRD into concrete deliverables, milestones, accept
 ## 13) Runbooks
 
 - Start/Stop
-  - docker-compose up -d
-  - docker-compose restart app
-  - docker-compose restart worker
+  - docker compose up -d --build
+  - docker compose restart app
+  - docker compose restart worker
 - Health Checks
   - curl http://localhost:5001/ (UI)
   - curl http://localhost:5001/api/status/<nonexistent> (404 expected)
@@ -379,7 +379,7 @@ This plan operationalizes the PRD into concrete deliverables, milestones, accept
 ## 15) Immediate Next Actions
 
 1) Restart web server for manual testing  
-   - Command: docker-compose restart app
+   - Command: docker compose restart app
 
 2) Verify pipeline via provided scripts  
    - scripts/test_parallel_pipeline.py  

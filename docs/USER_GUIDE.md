@@ -2,6 +2,24 @@
 
 This guide explains how to install, configure, and run the Transcript Analysis Tool, including the phased pipeline (Stage A transcript analyses → Stage B results analyses → Meeting Notes + Composite Report) and dated outputs.
 
+## Web App Quick Start (Docker)
+
+Most users will run the web app via Docker:
+
+1. Copy env template and set server variables (you can set your API key in-app later):
+
+   cp .env.template .env
+
+2. Start the stack (app, worker, redis):
+
+   docker compose up -d --build
+
+3. Open the UI and set your key (if not configured server-wide):
+
+   http://localhost:5001
+
+At the top of the page, the “Your OpenAI API Key” field shows dots if a valid server key is present (masked). Delete the dots and paste your key to override for your session. You can Clear to revert to the server key.
+
 ## Table of Contents
 1. Quick Start
 2. Installation
@@ -13,7 +31,7 @@ This guide explains how to install, configure, and run the Transcript Analysis T
 8. Examples
 9. FAQ
 
-## 1) Quick Start
+## 1) Quick Start (CLI)
 
 From the project root, you can use the test runner for an end-to-end run:
 
@@ -37,7 +55,7 @@ Example outputs:
 - output/YYYY-MM-DD_{base}_composite_report.md
 - output/YYYY-MM-DD_{base}_pipeline_result.json
 
-## 2) Installation
+## 2) Installation (CLI)
 
 Prerequisites:
 - Python 3.10+
@@ -61,7 +79,7 @@ Verify setup:
 python verify_setup.py
 ```
 
-## 3) Running the Tool
+## 3) Running the Tool (CLI)
 
 You can use either the test runner (recommended during development) or the CLI.
 

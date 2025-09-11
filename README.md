@@ -44,7 +44,7 @@ Quick Start (Docker)
    # edit .env and set OPENAI_API_KEY
 
 2) Start services (app, worker, redis):
-   docker-compose up -d --build
+   docker compose up -d --build
 
 3) Open the UI:
    http://localhost:5001
@@ -57,6 +57,15 @@ Docker Notes
 - The app service binds container port 5000 to host port 5001 (see `docker-compose.yml`).
 - The default command runs Gunicorn with the Eventlet worker to support Socket.IO.
 - The worker service runs Celery for the analysis pipeline.
+
+Common Docker Commands
+- Restart app/worker after code changes:
+  docker compose restart app
+  docker compose restart worker
+- View logs:
+  docker compose logs -f app worker
+- Stop services:
+  docker compose down
 
 Local Development (without Docker)
 1) Create a virtualenv and install deps:
@@ -94,6 +103,8 @@ Running an Analysis
 1) Paste transcript text or choose a file.
 2) Select analyzers per stage and, optionally, choose prompt variants.
 3) Click Start. Watch live progress and results populate.
+  - Results render as Markdown with code highlighting and readable typography (no raw `#` headers).
+  - The results pane uses a light card (black text on white) regardless of OS/browser dark mode.
 
 Key Endpoints
 - UI: `/`

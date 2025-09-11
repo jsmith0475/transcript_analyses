@@ -322,7 +322,7 @@ key: job:{jobId}
 14. Deployment and Runbook
 
 14.1 Local (Docker)
-- docker-compose up --build
+- docker compose up -d --build
 - Visit http://localhost:5001
 - Health: GET /api/health (if exposed) or check logs show “status: ok”
 
@@ -330,7 +330,7 @@ key: job:{jobId}
 - Copy .env.template → .env and fill OPENAI_API_KEY and SESSION_SECRET.
 
 14.3 Restart Procedure
-- docker-compose restart app worker
+- docker compose restart app worker
 - Validate with scripts/test_api.py and scripts/test_web_ui.py
 
 14.4 Production Notes
@@ -464,7 +464,7 @@ Security
 
 20. Run Commands (Live Mode with Real GPT)
 
-- Local stack: docker-compose up --build
+- Local stack: docker compose up -d --build
 - Smoke test API: python scripts/test_api.py
 - Full pipeline test: python scripts/test_full_pipeline.py
 - Parallelism test: python scripts/test_parallel_pipeline.py
@@ -486,7 +486,7 @@ Ensure .env has OPENAI_API_KEY and LIVE_MODE=true. Use gpt-4o-mini by default fo
 
 22. Acceptance Validation Script (What we will execute to sign off)
 
-1) Restart stack with fresh .env and clear Redis; docker-compose up --build
+1) Restart stack with fresh .env and clear Redis; docker compose up -d --build
 2) Load UI; paste a 10–20 paragraph transcript; select all analyzers; Start
 3) Observe:
    - Start disabled; tiles move to Processing; tokens/time accumulate
