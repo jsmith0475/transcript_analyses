@@ -583,12 +583,16 @@ def get_llm_client(use_cache: bool = True) -> LLMClient:
     try:
         if has_request_context():
             user_key = session.get('user_api_key')
-            if user_key:
-                base = get_config().llm
-                cfg = LLMConfig(**base.dict())
-                cfg.api_key = user_key
-                # Avoid caching per-user clients globally
-                return LLMClient(cfg)
+            if isinstance(user_key, str):
+                uk = user_key.strip()
+                # Minimal validation: OpenAI keys start with 'sk-' and are reasonably long
+                if len(uk) >= 20 and uk.startswith('sk-'):
+                    base = get_config().llm
+                    cfg = LLMConfig(**base.dict())
+                    cfg.api_key = uk
+                    # Avoid caching per-user clients globally
+                    return LLMClient(cfg)
+                # If invalid/stale key is present, ignore and fall back to server key
     except Exception:
         pass
 

@@ -16,6 +16,7 @@ from redis import Redis, from_url as redis_from_url
 
 from src.config import get_config, AppConfig
 from .sockets import socketio
+from openai import OpenAI
 
 
 def _init_session_store(app: Flask, cfg: AppConfig) -> Optional[Redis]:
@@ -93,6 +94,28 @@ def create_app(config_object: AppConfig | None = None) -> Flask:
     from .api import api_bp  # defer import until app exists
     app.register_blueprint(api_bp, url_prefix="/api")
 
+    # Validate server-wide API key once at startup for clearer diagnostics
+    try:
+        key = getattr(cfg.llm, 'api_key', None)
+        app.config['SERVER_API_KEY_PRESENT'] = bool(key)
+        app.config['SERVER_API_KEY_VALID'] = False
+        app.config['SERVER_API_KEY_MASKED'] = None
+        if key:
+            try:
+                _ = ("****" + key[-4:]) if len(key) >= 4 else "****"
+                app.config['SERVER_API_KEY_MASKED'] = _
+            except Exception:
+                app.config['SERVER_API_KEY_MASKED'] = '****'
+            try:
+                client = OpenAI(api_key=key)
+                client.models.list()
+                app.config['SERVER_API_KEY_VALID'] = True
+            except Exception:
+                app.logger.warning('Server OPENAI_API_KEY appears invalid; UI will prompt for a user key.')
+    except Exception:
+        # Non-fatal; proceed
+        pass
+
     # Root UI
     @app.get("/")
     def index():
@@ -107,6 +130,8 @@ def create_app(config_object: AppConfig | None = None) -> Flask:
                 "time": datetime.utcnow().isoformat() + "Z",
                 "model": cfg.llm.model,
                 "redis": app.config.get("SESSION_TYPE"),
+                "serverApiKeyPresent": bool(app.config.get('SERVER_API_KEY_PRESENT')),
+                "serverApiKeyValid": bool(app.config.get('SERVER_API_KEY_VALID')),
             }
         )
 
