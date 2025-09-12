@@ -1,6 +1,8 @@
 Transcript Analysis Tool
 ========================
 
+![Transcript Analysis Tool — Screenshot](docs/images/transcript%20analyzer.png)
+
 An interactive Flask web app for multi‑stage transcript analysis with LLMs. It ingests a transcript, runs Stage A analyzers, rolls them up into Stage B, and then generates Final outputs (e.g., meeting notes, composite notes). Prompts are managed as Markdown files under `prompts/` and can be edited in‑app.
 
 Features
