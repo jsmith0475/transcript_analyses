@@ -51,27 +51,27 @@ Key points:
 ## Detailed Pipeline
 
 ### Stage A: Transcript Analyses (Parallel)
-- Say-Means (prompts/stage a transcript analyses/1 say-means.md)
-- Perspective-Perception (prompts/stage a transcript analyses/2 perspective-perception.md)
-- Premises-Assertions (prompts/stage a transcript analyses/3 premsises-assertions.md)
-- Postulate-Theorem (prompts/stage a transcript analyses/4 postulate-theorem-proper.md)
+- Say-Means (prompts/stage a transcript analyses/say-means.md)
+- Perspective-Perception (prompts/stage a transcript analyses/perspective-perception.md)
+- Premises-Assertions (prompts/stage a transcript analyses/premsises-assertions.md)
+- Postulate-Theorem (prompts/stage a transcript analyses/postulate-theorem-proper.md)
 
 Behavior:
 - Each analyzer receives the formatted transcript and an isolated context.
 - Results are merged into a single Stage A combined context for Stage B.
 
 ### Stage B: Results Analyses (Parallel, Results-Only)
-- Competing Hypotheses (ACH) (prompts/stage b results analyses/5 analysis of competing hyptheses.md)
-- First Principles (prompts/stage b results analyses/6 first principles.md)
-- Determining Factors (prompts/stage b results analyses/7 determining factors.md)
-- Patentability (prompts/stage b results analyses/8 patentability.md)
+- Competing Hypotheses (ACH) (prompts/stage b results analyses/analysis of competing hyptheses.md)
+- First Principles (prompts/stage b results analyses/first principles.md)
+- Determining Factors (prompts/stage b results analyses/determining factors.md)
+- Patentability (prompts/stage b results analyses/patentability.md)
 
 Behavior:
 - Each analyzer overrides format_prompt to use ONLY the combined Stage A results.
 - No raw transcript text is injected in Stage B prompts (token-efficient).
 
 ### Final Synthesis
-- MeetingNotesAnalyzer (prompts/final output stage/9 meeting notes.md)
+- MeetingNotesAnalyzer (prompts/final output stage/meeting notes.md)
   - Consumes the formatted transcript plus the combined A+B results.
   - Produces Obsidian-friendly Meeting Notes with a dated H1 title.
   - Transcript injection can be Summary (synthesized) or Full (raw, capped) based on UI toggle.

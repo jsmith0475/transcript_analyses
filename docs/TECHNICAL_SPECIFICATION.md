@@ -105,38 +105,38 @@ Pydantic BaseModel classes (selection):
 
 ## 4) Analyzers Specification
 
-### 4.1 Stage A — Transcript Analyses (prompt source: prompts/stage a transcript analyses/*)
-- `say_means` → 1 say-means.md
+- ### 4.1 Stage A — Transcript Analyses (prompt source: prompts/stage a transcript analyses/*)
+- `say_means` → prompt under `prompts/stage a transcript analyses/`
   - Input: Transcript ONLY
   - Output: say_mean_pairs, hidden_agendas, etc.
-- `perspective_perception` → 2 perspective-perception.md
+- `perspective_perception` → prompt under `prompts/stage a transcript analyses/`
   - Input: Transcript ONLY
   - Output: explicit/implicit perceptions, perspectives, biases, gaps
-- `premises_assertions` → 3 premsises-assertions.md
+- `premises_assertions` → prompt under `prompts/stage a transcript analyses/`
   - Input: Transcript ONLY
   - Output: explicit/implicit premises, assertions, dependencies
-- `postulate_theorem` → 4 postulate-theorem-proper.md
+- `postulate_theorem` → prompt under `prompts/stage a transcript analyses/`
   - Input: Transcript ONLY
   - Output: postulates, theorems, logical chains
 
 ### 4.2 Stage B — Results Analyses (prompt source: prompts/stage b results analyses/*)
 Stage B analyzers OVERRIDE `format_prompt` to use ONLY the combined results context by default (no raw transcript). When “Include Transcript” is enabled in the UI, `{{ transcript }}` is also provided (trimmed), while fairness budgeting still applies to `{{ context }}`.
 
-- `competing_hypotheses` (ACH) → 5 analysis of competing hyptheses.md
+- `competing_hypotheses` (ACH) → prompt under `prompts/stage b results analyses/`
   - Input: Combined Stage A results ONLY (override implemented)
   - Output: hypotheses, evidence, ACH matrix, rankings, most_likely
-- `first_principles` → 6 first principles.md
+- `first_principles` → prompt under `prompts/stage b results analyses/`
   - Input: Combined results ONLY (override implemented)
   - Output: first_principles, core_truths, assumptions_removed
-- `determining_factors` → 7 determining factors.md
+- `determining_factors` → prompt under `prompts/stage b results analyses/`
   - Input: Combined results ONLY (override implemented)
   - Output: determining_factors, contributing_factors, impact_assessment
-- `patentability` → 8 patentability.md
+- `patentability` → prompt under `prompts/stage b results analyses/`
   - Input: Combined results ONLY (override implemented)
   - Output: patentable_ideas, categorization, likelihood_assessment
 
 ### 4.3 Final Synthesis
-- `meeting_notes` → prompts/final output stage/9 meeting notes.md
+- `meeting_notes` → prompt under `prompts/final output stage/`
   - Input: Transcript + Combined (A+B) results
   - Output: Obsidian-friendly meeting notes (dated title)
 

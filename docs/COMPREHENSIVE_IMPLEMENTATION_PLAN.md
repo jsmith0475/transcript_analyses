@@ -36,7 +36,7 @@ This document provides a detailed implementation plan for completing the Transcr
 # Location: src/analyzers/final_stage/meeting_notes.py
 ```
 - [ ] Create MeetingNotesAnalyzer class
-- [ ] Implement prompt template loading from `prompts/final output stage/9 meeting notes.md`
+- [ ] Implement prompt template loading from `prompts/final output stage/meeting notes.md`
 - [ ] Process aggregated Stage A + Stage B results
 - [ ] Generate structured meeting notes output
 - [ ] Add to pipeline orchestration

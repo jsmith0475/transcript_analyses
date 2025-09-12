@@ -205,7 +205,7 @@ Stage B — Results Analyses (prompt source: prompts/stage b results analyses/*)
 8. Patentability: Potentially patentable ideas and categorization
 
 Final Synthesis
-- Meeting Notes Analyzer (prompts/final output stage/9 meeting notes.md): Consumes transcript + combined A+B results
+- Meeting Notes Analyzer (prompts/final output stage/meeting notes.md): Consumes transcript + combined A+B results
 
 ## 7) Troubleshooting
 

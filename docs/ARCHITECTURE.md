@@ -533,26 +533,26 @@ The web interface renders these in the Inter‑Stage Context panel.
 ### 3. Prompt Template System
 
 ```yaml
-Directory Structure:
+Directory Structure (filesystem is source of truth; filenames determine slugs):
 prompts/
 ├── stage a transcript analyses/
-│   ├── 1 say-means.md
-│   ├── 2 perspective-perception.md
-│   ├── 3 premises-assertions.md
-│   └── 4 postulate-theorem.md
+│   ├── say-means.md
+│   ├── perspective-perception.md
+│   ├── premsises-assertions.md
+│   └── postulate-theorem.md
 ├── stage b results analyses/
-│   ├── 5 analysis of competing hypotheses.md
-│   ├── 6 first principles.md
-│   ├── 7 determining factors.md
-│   └── 8 patentability.md
+│   ├── analysis of competing hyptheses.md
+│   ├── first principles.md
+│   ├── determining factors.md
+│   └── patentability.md
 └── final output stage/
-    ├── 9 meeting notes.md
-    └── 9 composite note.md
+    ├── meeting notes.md
+    └── composite note.md
 
-Template Variables:
-- Stage A: {transcript} - Raw transcript text
-- Stage B: {context} - JSON with Stage A results
-- Final: {context} - All results, {transcript} - Optional original
+Template Variables (Jinja2):
+- Stage A: `{{ transcript }}` - Raw transcript text
+- Stage B: `{{ context }}` - Combined Stage A results (and optionally `{{ transcript }}` if enabled)
+- Final: `{{ context }}` (required), `{{ transcript }}` (optional)
 ```
 
 ## 🐳 Containerization Strategy
