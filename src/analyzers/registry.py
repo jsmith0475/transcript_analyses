@@ -308,48 +308,30 @@ def create_prompt_file_from_content(stage_key: str, slug: str, content: str) -> 
 
 def merge_registry_into_config(cfg: Any) -> None:
     """
-    Merge custom analyzers from registry into the live AppConfig:
-    - Append custom slugs into stage lists if not present
-    - Set cfg.analyzers[slug].prompt_file so cfg.get_prompt_path resolves
+    Merge analyzers from the filesystem-backed registry into the live AppConfig.
+    The filesystem is the source of truth:
+      - Replace stage analyzer lists with registry slugs in scan order
+      - Set cfg.analyzers[slug].prompt_file for all analyzers
     """
     from src.config import AnalyzerConfig  # Lazy import to avoid circular at module import time
 
     reg = load_registry()
 
-    def _ensure(cfg_list, slug):
-        if slug not in cfg_list:
-            cfg_list.append(slug)
+    # Replace stage lists with registry keys (preserve registry order)
+    cfg.stage_a_analyzers = list((reg.get("stageA") or {}).keys())
+    cfg.stage_b_analyzers = list((reg.get("stageB") or {}).keys())
+    cfg.final_stage_analyzers = list((reg.get("final") or {}).keys())
 
-    # Stage A
-    for slug, meta in (reg.get("stageA") or {}).items():
-        _ensure(cfg.stage_a_analyzers, slug)
-        try:
-            p = Path(meta.get("defaultPromptPath", ""))
-            if p:
-                cfg.analyzers[slug] = AnalyzerConfig(prompt_file=p)
-        except Exception:
-            # If invalid path, skip; will be validated on use
-            pass
-
-    # Stage B
-    for slug, meta in (reg.get("stageB") or {}).items():
-        _ensure(cfg.stage_b_analyzers, slug)
-        try:
-            p = Path(meta.get("defaultPromptPath", ""))
-            if p:
-                cfg.analyzers[slug] = AnalyzerConfig(prompt_file=p)
-        except Exception:
-            pass
-
-    # Final
-    for slug, meta in (reg.get("final") or {}).items():
-        _ensure(cfg.final_stage_analyzers, slug)
-        try:
-            p = Path(meta.get("defaultPromptPath", ""))
-            if p:
-                cfg.analyzers[slug] = AnalyzerConfig(prompt_file=p)
-        except Exception:
-            pass
+    # Set prompt_file for each analyzer from registry metadata
+    for stage_key in ("stageA", "stageB", "final"):
+        for slug, meta in (reg.get(stage_key) or {}).items():
+            try:
+                p = Path(meta.get("defaultPromptPath", ""))
+                if p:
+                    cfg.analyzers[slug] = AnalyzerConfig(prompt_file=p)
+            except Exception:
+                # Invalid paths are tolerated; validated at use-time
+                pass
 
 
 def find_slug_stage(reg: Dict[str, Any], slug: str) -> Optional[str]:

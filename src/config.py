@@ -384,23 +384,6 @@ class AppConfig(BaseSettings):
         if analyzer_config.prompt_file:
             return analyzer_config.prompt_file
 
-        # Fallback map for legacy built-ins
-        prompt_mapping = {
-            'say_means': 'prompts/stage a transcript analyses/1 say-means.md',
-            'perspective_perception': 'prompts/stage a transcript analyses/2 perspective-perception.md',
-            'premises_assertions': 'prompts/stage a transcript analyses/3 premsises-assertions.md',
-            'postulate_theorem': 'prompts/stage a transcript analyses/4 postulate-theorem.md',
-            'competing_hypotheses': 'prompts/stage b results analyses/1 analysis of competing hyptheses.md',
-            'first_principles': 'prompts/stage b results analyses/2 first principles.md',
-            'determining_factors': 'prompts/stage b results analyses/3 determining factors.md',
-            'patentability': 'prompts/stage b results analyses/4 patentability.md',
-            'meeting_notes': 'prompts/final output stage/2 meeting notes.md',
-            'composite_note': 'prompts/final output stage/1 composite note.md',
-        }
-
-        if analyzer_name in prompt_mapping:
-            return Path(prompt_mapping[analyzer_name])
-
         # Attempt to resolve from registry directly as last resort
         try:
             from src.analyzers.registry import load_registry, find_slug_stage
