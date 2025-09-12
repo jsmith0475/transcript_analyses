@@ -114,21 +114,25 @@
 
     // Unwrap fenced code blocks that contain a pipe table
     try {
-      const fence = /```[^\n]*\n([\s\S]*?)\n```/g;
-      txt = txt.replace(fence, (m, body) => {
+      // Match ``` or ~~~ fences of length >=3
+      const fenceAny = /(^|\n)(`{3,}|~{3,})[^\n]*\n([\s\S]*?)\n\2(\s*?)(?=\n|$)/g;
+      txt = txt.replace(fenceAny, (full, lead, fenceChars, body) => {
         const b = (body || '').trim();
         const lines = b.split(/\r?\n/);
-        if (lines.length < 2) return m;
-        const h = lines[0] || '';
-        // Require header to look like a table row
-        if (!/^\s*\|.*\|\s*$/.test(h)) return m;
-        // Repair/ensure separator
-        let sep = lines[1] || '';
-        const colCount = h.split('|').filter((x) => x.trim()).length;
-        const canonical = '|' + Array(colCount).fill('---').join('|') + '|';
-        if (!/-{3,}/.test(sep)) lines[1] = canonical;
-        // Drop the fences
-        return '\n' + lines.join('\n') + '\n';
+        if (lines.length < 2) return full; // keep original fence
+        const h = (lines[0] || '').trim();
+        const sepLine = (lines[1] || '').trim();
+        // Heuristic: header has a pipe somewhere; separator has pipes and dashes/colons
+        const headerLooksTabular = /\|/.test(h);
+        const sepLooksTabular = /\|/.test(sepLine) && /[-:]/.test(sepLine);
+        if (!headerLooksTabular || !sepLooksTabular) return full;
+        // Ensure separator columns count is reasonable
+        const colCount = h.split('|').map((x) => x.trim()).filter(Boolean).length;
+        if (colCount >= 2) {
+          const canonical = '|' + Array(colCount).fill('---').join('|') + '|';
+          if (!/-{3,}/.test(sepLine)) lines[1] = canonical;
+        }
+        return (lead || '\n') + lines.join('\n') + '\n';
       });
     } catch {}
 
@@ -543,66 +547,89 @@
 
   function renderMarkdown(md) {
     try {
-      const html = marked.parse(normalizeMarkdown(md || ""));
-      // Highlight code blocks
+      const normalized = normalizeMarkdown(md || "");
+      const looksLikePipeTable = /\n?[^\n]*\|[^\n]*\n[^\n]*[-:]+\|[^\n]*\n/.test(normalized);
+      let html = "";
+      if (window.__renderer === 'markdown-it' && window.__mdRenderer) {
+        html = window.__mdRenderer.render(normalized);
+        // Fallback: if an obvious table wasn't parsed into <table>, try Marked
+        if (looksLikePipeTable && !/<table[\s>]/i.test(html) && window.marked && typeof window.marked.parse === 'function') {
+          html = window.marked.parse(normalized);
+        }
+      } else if (window.marked && typeof window.marked.parse === 'function') {
+        html = window.marked.parse(normalized);
+      } else {
+        return `<pre class="whitespace-pre-wrap">${normalized}</pre>`;
+      }
+
+      // Sanitize if DOMPurify is present
+      try {
+        if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+          html = window.DOMPurify.sanitize(html);
+        }
+      } catch {}
+
       const container = document.createElement("div");
       container.innerHTML = html;
-      // If the LLM wrapped tables in code fences (``` ... ```), unwrap them back to real tables
-      try {
-        Array.from(container.querySelectorAll('pre code')).forEach((block) => {
-          // Normalize dash characters and attempt to coerce a Markdown pipe table
-          const original = (block.textContent || '').trim();
-          let raw = original.replace(/[–—−]/g, '-');
-          const lines = raw.split(/\r?\n/);
-          if (lines.length < 2) return;
-          const header = lines[0] || '';
-          if (!/^\s*\|.*\|\s*$/.test(header)) return; // must start with pipe table row
-          // Count header columns
-          const cols = header.split('|').map(s => s.trim()).filter(Boolean).length;
-          if (cols < 2) return;
-          // Generate a canonical separator line and use it if the current one looks wrong
-          const canonicalSep = '|' + Array(cols).fill('---').join('|') + '|';
-          const sep = (lines[1] || '').replace(/[–—−]/g, '-');
-          const sepLooksOk = /-{3,}/.test(sep) && (sep.split('|').length - 1) >= cols;
-          if (!sepLooksOk) lines[1] = canonicalSep;
 
-          // Re-parse this block as Markdown and replace the <pre> entirely
-          const pre = block.parentElement;
+      // If any <pre><code> blocks still contain a table-like pipe header, try converting that block to Markdown HTML
+      try {
+        const blocks = Array.from(container.querySelectorAll('pre code'));
+        blocks.forEach((block) => {
+          const original = String(block.textContent || '').replace(/[–—−]/g, '-');
+          const lines = original.split(/\r?\n/);
+          if (lines.length < 2) return;
+          const head = (lines[0] || '').trim();
+          const sep = (lines[1] || '').trim();
+          const tableish = /\|/.test(head) && /\|/.test(sep) && /[-:]/.test(sep);
+          if (!tableish) return;
+          // Ensure separator consistency
+          const colCount = head.split('|').map(s => s.trim()).filter(Boolean).length;
+          if (colCount >= 2 && !/-{3,}/.test(sep)) {
+            lines[1] = '|' + Array(colCount).fill('---').join('|') + '|';
+          }
           const toParse = lines.join('\n');
-          const parsed = marked.parse(toParse);
+          let parsed = '';
+          if (window.__renderer === 'markdown-it' && window.__mdRenderer) {
+            parsed = window.__mdRenderer.render(toParse);
+          } else if (window.marked && typeof window.marked.parse === 'function') {
+            parsed = window.marked.parse(toParse);
+          }
+          if (!parsed) return;
+          try { if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') { parsed = window.DOMPurify.sanitize(parsed); } } catch {}
+          // Replace the entire <pre> with the parsed HTML nodes
+          const pre = block.parentElement;
           const tmp = document.createElement('div');
           tmp.innerHTML = parsed;
-          const repl = document.createElement('div');
-          repl.append(...Array.from(tmp.childNodes));
-          if (pre && pre.parentNode) pre.parentNode.replaceChild(repl, pre);
+          if (pre && pre.parentNode) {
+            const wrapper = document.createElement('div');
+            wrapper.append(...Array.from(tmp.childNodes));
+            pre.parentNode.replaceChild(wrapper, pre);
+          }
         });
       } catch {}
 
-      // Post-process tables for better readability and responsiveness
+      // Enhance tables for readability and responsiveness
       try {
         container.querySelectorAll("table").forEach((tbl) => {
-          // Wrap in a horizontally scrollable container to avoid overflow
           const wrap = document.createElement('div');
           wrap.className = 'overflow-x-auto my-3';
-          tbl.parentNode && tbl.parentNode.insertBefore(wrap, tbl);
-          wrap.appendChild(tbl);
-          // Add utility classes for borders and spacing
+          if (tbl.parentNode) { tbl.parentNode.insertBefore(wrap, tbl); wrap.appendChild(tbl); }
           tbl.classList.add('w-full');
-          // Add borders/padding to cells
           tbl.querySelectorAll('th, td').forEach((cell) => {
             cell.classList.add('border', 'border-gray-200', 'p-2', 'align-top');
           });
-          // Slight header background for contrast
-          tbl.querySelectorAll('thead th').forEach((th) => {
-            th.classList.add('bg-slate-50');
-          });
+          tbl.querySelectorAll('thead th').forEach((th) => th.classList.add('bg-slate-50'));
         });
       } catch {}
-      container.querySelectorAll("pre code").forEach((block) => {
-        try {
-          hljs.highlightElement(block);
-        } catch {}
-      });
+
+      // Syntax highlight code blocks
+      try {
+        container.querySelectorAll("pre code").forEach((block) => {
+          try { hljs.highlightElement(block); } catch {}
+        });
+      } catch {}
+
       return container.innerHTML;
     } catch (e) {
       return `<pre class="whitespace-pre-wrap">${md || ""}</pre>`;
@@ -787,6 +814,24 @@
         try { renderAnalyzerLists(promptOptions); } catch {}
       });
     }
+
+    // Stage selection shortcuts: All / None
+    try {
+      el.selectAllBtns().forEach((b) => {
+        b.onclick = () => {
+          const stage = b.getAttribute('data-sel');
+          if (!stage) return;
+          toggleStageSelection(stage, true);
+        };
+      });
+      el.deselectAllBtns().forEach((b) => {
+        b.onclick = () => {
+          const stage = b.getAttribute('data-sel');
+          if (!stage) return;
+          toggleStageSelection(stage, false);
+        };
+      });
+    } catch (e) { /* no-op */ }
   }
 
   // Run controls (disable/enable during active analysis)
@@ -1027,42 +1072,7 @@
       el.analyzerCrudModal().classList.remove("hidden");
       el.analyzerCrudModal().classList.add("flex");
 
-      // Wire Normalize button for free-form prompt content
-      try {
-        const normBtn = document.getElementById('normalizePromptBtn');
-        const status = document.getElementById('normalizeStatus');
-        const ta = el.analyzerPromptContent && el.analyzerPromptContent();
-        const stageSel = el.analyzerStage && el.analyzerStage();
-        const fromFileToggle = document.getElementById('analyzerFromFileToggle');
-        if (normBtn && ta && stageSel) {
-          normBtn.onclick = async () => {
-            try {
-              if (fromFileToggle && fromFileToggle.checked) {
-                if (status) status.textContent = 'Disable "from file" to normalize pasted text.';
-                return;
-              }
-              const raw = (ta.value || '').trim();
-              if (!raw) { if (status) status.textContent = 'Paste a prompt first.'; return; }
-              normBtn.disabled = true;
-              if (status) status.textContent = 'Normalizing…';
-              const stageVal = stageSel.value || 'stageA';
-              const res = await window.API.normalizePrompt({ promptContent: raw, stage: stageVal });
-              if (!res || res.ok === false) throw new Error(res && res.error || 'Normalize failed');
-              const { stageDetected, normalized } = res;
-              ta.value = normalized || raw;
-              if (stageDetected && ['stageA','stageB','final'].includes(stageDetected)) {
-                stageSel.value = stageDetected;
-              }
-              if (status) status.textContent = `Normalized (${stageDetected || 'stageA'})`;
-            } catch (e) {
-              if (status) status.textContent = 'Normalize error: ' + (e.message || e);
-            } finally {
-              normBtn.disabled = false;
-              setTimeout(() => { if (status) status.textContent = ''; }, 2500);
-            }
-          };
-        }
-      } catch {}
+      // Normalize functionality removed per request
     } catch {}
   }
   function closeAnalyzerCrud() {
@@ -1100,19 +1110,6 @@
         const defaultPromptPath = decodeURIComponent(select.value);
         await window.API.createAnalyzer({ stage: stageLabel, slug, displayName, defaultPromptPath });
       } else {
-        // Auto-normalize if free-form
-        const raw = (promptContent || '').trim();
-        if (raw && !/^<prompt>/i.test(raw)) {
-          try {
-            const res = await window.API.normalizePrompt({ promptContent: raw, stage });
-            if (res && res.ok && res.normalized) {
-              promptContent = res.normalized;
-              if (res.stageDetected && ['stageA','stageB','final'].includes(res.stageDetected)) {
-                stage = res.stageDetected;
-              }
-            }
-          } catch (e) { /* proceed */ }
-        }
         const sLabel = stage === 'stageA' ? 'A' : (stage === 'stageB' ? 'B' : 'Final');
         await window.API.createAnalyzer({ stage: sLabel, slug, displayName, promptContent });
       }

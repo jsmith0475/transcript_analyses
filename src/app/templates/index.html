@@ -21,9 +21,9 @@
     .badge { border-radius: 0.375rem; padding: 0.125rem 0.5rem; font-size: 0.75rem; }
     /* Ensure readable, well-formatted Markdown tables in results */
     #resultsContent table { width: 100%; border-collapse: collapse; display: table; }
+    /* Keep optional subtle header contrast; remove zebra striping for rows */
     #resultsContent thead th { background-color: #f8fafc; }
-    #resultsContent th, #resultsContent td { border: 1px solid #e5e7eb; padding: 0.5rem; vertical-align: top; }
-    #resultsContent tr:nth-child(even) td { background-color: #fafafa; }
+    #resultsContent th, #resultsContent td { border: 1px solid #e5e7eb; padding: 0.5rem; vertical-align: top; background: transparent; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -678,10 +678,9 @@
           </label>
           <label class="block text-sm">
             <span class="text-xs text-gray-600">Prompt Content (optional if you will map to an existing prompt later)</span>
-            <textarea id="analyzerPromptContent" class="w-full h-40 border rounded p-2 font-mono text-sm" placeholder="Paste a free-form prompt. Click Normalize to wrap to standard schema."></textarea>
+            <textarea id="analyzerPromptContent" class="w-full h-40 border rounded p-2 font-mono text-sm" placeholder="Paste a fully-formed prompt. Include required variables (e.g., {{ transcript }} or {{ context }})."></textarea>
             <div class="mt-2 flex items-center gap-2">
-              <button id="normalizePromptBtn" class="px-2 py-1 border rounded text-xs">Normalize</button>
-              <span id="normalizeStatus" class="text-xs text-gray-500"></span>
+              <!-- Normalize button removed -->
             </div>
           </label>
         </div>
@@ -718,14 +717,20 @@
   <!-- Vendor scripts -->
   <!-- Use Socket.IO v4 client from CDN to match Flask-SocketIO server -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <!-- Markdown renderers: prefer markdown-it (+plugins), fallback to marked -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-gfm@2.0.3/index.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-multimd-table@4.2.3/dist/markdown-it-multimd-table.min.js"></script>
+  <!-- DOMPurify for sanitization (allowlist keeps tables and strips scripts/events) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <!-- Keep marked available as a fallback -->
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"
     integrity="sha512-Hn+qyDUiAG0Qwe0Z2RPUiKpyD/UWrJwSGdA9uEWtV6yEODQ3ER5SKd4pKwrX2snIVsONwRrKyf1nQS8a8eK5Ew=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   ></script>
-  <!-- Fallback for marked if primary CDN blocked -->
-  <script>window.marked||document.write('<script src="https://cdn.jsdelivr.net/npm/marked@12/min/marked.min.js"><\/script>')</script>
+  <script>window.marked||document.write('<script src=\"https://cdn.jsdelivr.net/npm/marked@12/min/marked.min.js\"><\\/script>')</script>
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
     integrity="sha512-6z4r2gq3y0gqh+Kn9U1kZUp3v0QvT2M8c4bN3p1RZl3nBM1Yb1z9X5kGgA1yq1Zlsw2pO8kZr1fE8p0p3oGQjw=="
@@ -733,10 +738,31 @@
     referrerpolicy="no-referrer"
   ></script>
   <!-- Fallback for highlight.js if primary CDN blocked -->
-  <script>window.hljs||document.write('<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"><\/script>')</script>
+  <script>window.hljs||document.write('<script src=\"https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js\"><\\/script>')</script>
   <script>
-    // Tweak marked defaults if available (enable GFM tables)
-    try { if (window.marked) { marked.setOptions({ gfm: true, breaks: true, mangle: false, headerIds: true }); } } catch(e) {}
+    // Initialize preferred markdown renderer: markdown-it with GFM + multimd-table
+    (function () {
+      try {
+        if (window.markdownit) {
+          // Allow raw HTML so LLM can return <table> directly; sanitized later via DOMPurify
+          var md = window.markdownit({ html: true, linkify: true, typographer: false });
+          try { if (window.markdownitGfm) md.use(window.markdownitGfm); } catch(e) {}
+          try { if (window.markdownitMultimdTable) md.use(window.markdownitMultimdTable, { multiline: true, rowspan: true, headerless: true }); } catch(e) {}
+          window.__renderer = 'markdown-it';
+          window.__mdRenderer = md;
+          // Sanity check: ensure tables are supported, else prefer Marked
+          try {
+            var _probe = '| A | B |\n|---|---|\n| 1 | 2 |';
+            var _out = md.render(_probe) || '';
+            if (!/<table[\s>]/i.test(_out)) { window.__renderer = 'marked'; }
+          } catch(err) { window.__renderer = 'marked'; }
+        } else {
+          window.__renderer = 'marked';
+        }
+      } catch (e) { window.__renderer = 'marked'; }
+      // Configure marked (fallback) with GFM support
+      try { if (window.marked) { marked.setOptions({ gfm: true, breaks: true, mangle: false, headerIds: true }); } } catch(e) {}
+    })();
   </script>
 
   <!-- App scripts -->

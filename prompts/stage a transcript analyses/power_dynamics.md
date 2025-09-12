@@ -4,14 +4,10 @@
   <role>Analyze the raw transcript and produce a structured, evidence-based report.</role>
 
   <response_header_required>
-    At the very start of your response, output exactly one line:
-    Definition: <one sentence (≤ 20 words) describing this analysis in plain English>
+    At the very start of your response, output exactly three line:
+    Definition: <three sentence (≤ 100 words) describing this analysis in plain English>
     Then leave one blank line and continue.
   </response_header_required>
-
-  <inputs>
-    <transcript>{{ transcript }}</transcript>
-  </inputs>
 
   <constraints>
     - Do NOT include any angle-bracket tags in your output.
@@ -55,3 +51,7 @@
   One per bullet, specific guardrails/facilitation moves to balance influence (optional Owner and Due inline)
   </instructions>
 </prompt>
+
+<inputs>
+  <transcript>{{ transcript }}</transcript>
+</inputs>

@@ -22,6 +22,7 @@ cache/
 output/
 uploads/
 transcript_analyses/
+_images/
 
 # Logs and temp
 *.log

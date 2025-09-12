@@ -1,9 +1,17 @@
+ 
 <prompt>
   <response_header_required>
-        At the very start of your response, output exactly one line:
-        Definition: <one sentence (≤ 20 words) describing this analysis in plain English>
-        Then leave one blank line and continue.
+    At the very start of your response, output exactly three line:
+    Definition: <three sentence (≤ 100 words) describing this analysis in plain English>
+    Then leave one blank line and continue.
   </response_header_required>
+  
+  <constraints>
+    - For any tabular summary, return tables as HTML, not Markdown. Use valid HTML table structure:
+      <table><thead><tr><th>…</th></tr></thead><tbody>…</tbody></table>
+    - Do not wrap the HTML table in code fences.
+  </constraints>
+
 
 This is the {context} and {transcript} from a meeting. Please perform the following tasks:
 
@@ -17,11 +25,18 @@ Determining and Contributing (please give a single line description for referenc
 
 First Principles Analysis: Identify first principles discussed in the meeting. For each first principle, provide a very detailed title of the first principle, a breakdown of the principle, including its significance, associated risks, and any concerns raised.
 
-Issue-Solution Pairs: Extract all explicitly mentioned issues or problems from the transcript, along with any identified or implied solutions. Each issue-solution pair should be detailed, comprehensive, and clear.
+Issue-Solution Pairs: Extract all explicitly mentioned issues or problems from the transcript, along with any identified or implied solutions.  Each issue-solution pair should be detailed, comprehensive, and clear. Create a table like:
+Antifragile Patentable Ideas. For example:
+|**Issue**|**Solution**|**Details**|
+  |---|---|---|
 
-Action Items: List all explicit and implicit action items from the transcript, with enough context to understand Determine's purpose.
-Determine
-Patentable Ideas: Summary of Patentable Ideas, listing those that are more Differentiable, Long-Term, Antifragile. Include any summary table on patentable ideas, if created.
+Action Items: Create a Table of all explicit and implicit action items from the transcript, with enough context to understand Determine's purpose. FOr example:
+|**Action Item**|**Owner**|**Due Date**|
+  |---|---|---|
+
+Determine Patentable Ideas: Create a Table that summarizes any Differentiable, Long-Term, Antifragile Patentable Ideas. For example:
+|**Category**|**Idea**|**Justification**|**Patentability**|**Reason**|
+  |---|---|---|---|---|
 
 Since these notes will be used in my Obsidian system as my "second brain," link the first mention of major concepts in [[ ]] brackets to support "Linking is Thinking." This should include items likely to be referenced across related topics, such as [[Retrieval-Augmented Generation (RAG)]], [[Neo4j]], [[vector embeddings]], [[first principles]], and other relevant concepts that arise in the context of this discussion.
 

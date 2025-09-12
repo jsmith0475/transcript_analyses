@@ -6,11 +6,10 @@
   </role>
 
   <response_header_required>
-    At the very start of your response, output exactly one line:
-    Definition: <one sentence (≤ 20 words) describing this analysis in plain English>
+    At the very start of your response, output exactly three line:
+    Definition: <three sentence (≤ 100 words) describing this analysis in plain English>
     Then leave one blank line and continue.
-  </response_header_required>
-
+    </response_header_required>
   <inputs>
     <context>{{ context }}</context>
     <transcript optional="true">{{ transcript }}</transcript>

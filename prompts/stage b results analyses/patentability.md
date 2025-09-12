@@ -6,10 +6,16 @@
   </role>
 
   <response_header_required>
-    At the very start of your response, output exactly one line:
-    Definition: <one sentence (≤ 20 words) describing this analysis in plain English>
+    At the very start of your response, output exactly three line:
+    Definition: <three sentence (≤ 100 words) describing this analysis in plain English>
     Then leave one blank line and continue.
   </response_header_required>
+
+  <constraints>
+    - For any tabular summary, return tables as HTML, not Markdown. Use valid HTML table structure:
+      <table><thead><tr><th>…</th></tr></thead><tbody>…</tbody></table>
+    - Do not wrap the HTML table in code fences.
+  </constraints>
 
   <directions>
     You are an expert analyst specializing in product strategy and decision-making frameworks. Given the all the code (python, javascript, yaml, config, markdown, etc.) and discussion, your task is to identify and classify ideas into **8 distinct categories** based on the following dimensions:
@@ -55,27 +61,11 @@
   - **Patentability**: [Likely Patentable / Unlikely Patentable]
     - **Reason**: [Explain why the idea is or is not patentable based on the category and characteristics.]
 
-  Create a Summary Table of the ideas at the end
 
-  ### Example Output:
-  1. **Category**: Differentiable, Long-Term, Antifragile  
-    - **Idea**: "Building a seamless ecosystem of devices and services."  
-    - **Justification**: This idea is unique (Differentiable), focuses on enduring value (Long-Term), and grows stronger with more users and engagement (Antifragile).  
-    - **Patentability**: Likely Patentable  
-      - **Reason**: Represents a novel, enduring system that is hard to replicate and benefits from network effects.
-
-  2. **Category**: Capable, Short-Term, Fragile  
-    - **Idea**: "Creating a temporary discount system to boost sales."  
-    - **Justification**: This idea is reliable (Capable), targets immediate impact (Short-Term), and is vulnerable to market competition (Fragile).  
-    - **Patentability**: Unlikely Patentable  
-      - **Reason**: Lacks novelty and is based on common business practices.
-
-  Patentability Summary
-
+  Patentability Summary: Create a Table that summarizes all patentable ideas For example:
   |**Category**|**Idea**|**Justification**|**Patentability**|**Reason**|
   |---|---|---|---|---|
-  |Differentiable, Long-Term, Antifragile|"Building a seamless ecosystem of devices and services."|Unique (Differentiable), enduring value (Long-Term), grows stronger with user engagement (Antifragile).|Likely Patentable|Novel, enduring system, hard to replicate, benefits from network effects.|
-  |Capable, Short-Term, Fragile|"Creating a temporary discount system to boost sales."|Reliable (Capable), targets immediate impact (Short-Term), vulnerable to market competition (Fragile).|Unlikely Patentable|Lacks novelty, based on common business practices.|
+
 </directions>
 
 <inputs>

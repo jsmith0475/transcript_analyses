@@ -34,6 +34,7 @@ Submitting an Analysis
 
 2) Select Analyzers and Prompts
 - Stage A, Stage B, and Final analyzers appear in three columns
+ - Use the All/None buttons in each column to quickly select or deselect every analyzer in that stage.
  - By default, prompt dropdowns are hidden. Enable the “Advanced” toggle to reveal them.
  - Dropdowns only appear for analyzers that have more than one prompt option (populated via /api/prompt-options).
  - Selecting a different prompt updates the analyzer label to the chosen prompt’s name and applies only to the current run.

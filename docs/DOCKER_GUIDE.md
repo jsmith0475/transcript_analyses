@@ -4,6 +4,8 @@
 **Last Updated**: September 9, 2025  
 **Purpose**: Complete guide for Docker containerization and orchestration
 
+Note for non‑technical users: for a simple, step‑by‑step install and run guide, see docs/END_USER_DOCKER_INSTALL.md.
+
 ## 🐳 Docker Overview
 
 The Transcript Analysis Tool uses Docker for consistent development and deployment environments. Our containerization strategy ensures that the application runs identically across all environments - from local development to production deployment.
