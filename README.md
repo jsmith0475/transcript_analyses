@@ -11,7 +11,7 @@ Features
 - REST API for UI and automation
 
 How To Use (User‑Focused)
-- Prefer a simple, non‑technical install? See docs/END_USER_DOCKER_INSTALL.md for a step‑by‑step Docker guide (install Docker Desktop, get the app, start it, and run analyses).
+- Prefer a simple, non‑technical install? See END_USER_DOCKER_INSTALL.md for a step‑by‑step Docker guide (install Docker Desktop, get the app, start it, and run analyses).
 - See HOW_TO_USE.md for a step‑by‑step user guide (API key in‑app, choosing analyzers/prompts, running, and exporting results).
 
 Requirements

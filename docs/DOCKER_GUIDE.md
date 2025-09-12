@@ -4,7 +4,7 @@
 **Last Updated**: September 9, 2025  
 **Purpose**: Complete guide for Docker containerization and orchestration
 
-Note for non‑technical users: for a simple, step‑by‑step install and run guide, see docs/END_USER_DOCKER_INSTALL.md.
+Note for non‑technical users: for a simple, step‑by‑step install and run guide, see END_USER_DOCKER_INSTALL.md.
 
 ## 🐳 Docker Overview
 

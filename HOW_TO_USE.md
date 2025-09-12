@@ -3,7 +3,7 @@ How To Use — Transcript Analysis Tool
 
 This guide walks end‑users through running the web app, setting an API key, choosing analyzers/prompts, and exporting results.
 
-New to Docker? Start with docs/END_USER_DOCKER_INSTALL.md — a non‑technical, step‑by‑step install and run guide for Docker Desktop on Mac/Windows/Linux.
+New to Docker? Start with END_USER_DOCKER_INSTALL.md — a non‑technical, step‑by‑step install and run guide for Docker Desktop on Mac/Windows/Linux.
 
 Prerequisites
 - Docker Desktop (Compose v2) or Docker Engine + compose plugin
