@@ -1,6 +1,6 @@
 # Transcript Analysis Tool - Development Status
 
-Last Updated: September 7, 2025  
+Last Updated: September 11, 2025  
 Current Phase: Async pipeline and Stage B complete; proactive notifications and autonomous verification in place
 
 --------------------------------------------------------------------------------
@@ -117,6 +117,8 @@ Note: cpu_time_seconds (sum of analyzer processing_time) and wall_clock_seconds 
    - final_status.json machine-readable summary written for async runs and Celery jobs
 6. Orchestrator time reporting clarified (cpu_time_seconds vs wall_clock_seconds)
 7. Async orchestrator return updated to report cpu_time_seconds consistently
+8. Filesystem‑driven analyzer lists: stage lists now come from scanning `prompts/` at startup and on Rescan. Filenames determine slugs; no numeric prefixes required.
+9. Rescan refreshes worker: the Celery worker reloads registry/config during Rescan, so prompt changes are picked up without restarts.
 
 --------------------------------------------------------------------------------
 

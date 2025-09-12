@@ -132,5 +132,9 @@ Development Notes
 - Analyzer prompts are dynamically discovered at startup and on “Rescan”. The worker is also refreshed during rescan so you don’t need to restart it to pick up new prompts.
 - `.env` is ignored by git. Never commit your API key.
 
+What’s New (2025‑09‑11)
+- Filesystem‑driven analyzers: At startup and on “Rescan”, the app scans `prompts/` and replaces stage analyzer lists from the filesystem. Filenames determine slugs; numeric prefixes are no longer required.
+- Rescan refreshes the worker: The Celery worker reloads the registry/config during Rescan, so new/renamed prompt files are available immediately.
+
 License
 - Proprietary to your project unless you add a license.
