@@ -12,35 +12,24 @@ Features
 - Redis‑backed job status and Socket.IO live updates
 - REST API for UI and automation
 
-How To Use (User‑Focused)
-- Prefer a simple, non‑technical install? See END_USER_DOCKER_INSTALL.md for a step‑by‑step Docker guide (install Docker Desktop, get the app, start it, and run analyses).
-- See HOW_TO_USE.md for a step‑by‑step user guide (API key in‑app, choosing analyzers/prompts, running, and exporting results).
-- Understand staged prompts and how to write/choose them: see PROMPTS_USER_GUIDE.md.
+Quick Links
+- End‑user install (Docker): END_USER_DOCKER_INSTALL.md
+- User guide (running the app): HOW_TO_USE.md
+- Prompts overview (staging and authoring): PROMPTS_USER_GUIDE.md
+- Prompts catalog (per‑prompt details): PROMPTS_CATALOG.md
+- Web interface details: docs/WEB_INTERFACE_GUIDE.md
+- Docker details for developers: docs/DOCKER_GUIDE.md
 
 Requirements
-- Docker and Docker Compose (recommended), or
-- Python 3.11+, Redis 7+ (for local dev without Docker)
+- Docker and Docker Compose (recommended)
+- Or for local development: Python 3.11+ and Redis 7+
 
 Environment and API Key
-- Create .env (required): copy the template because other runtime variables live there, even if you plan to set your key in‑app.
-
-     cp .env.template .env
-
-- The app uses OpenAI by default. You have two ways to provide the API key:
-  1) Server-wide: set `OPENAI_API_KEY` in `.env` (or export in your shell). Example (`.env.template`):
-
-     OPENAI_API_KEY=sk-...your-key...
-
-  2) Per-user in the app: at the top of the UI there’s “Your OpenAI API Key”. Paste your key and click Save (optionally Test). This stores a session-scoped key so the server can run without a global key.
-
-  Notes:
-  - The app can start without any key; LLM features won’t work until a key is provided (either method above).
-  - You can Clear your per-user key in the UI to fall back to the server default.
-  - If a server default key is configured, the input box is prefilled with dots (masked) to indicate it’s in use. Delete the dots and paste your own key to override.
-
-- Optional environment variables:
-  - `OPENAI_MODEL` (default: `gpt-5-nano`)
-  - `REDIS_URL` (default: `redis://localhost:6379`)
+- Create `.env` (required): `cp .env.template .env`
+- Provide your OpenAI API key either:
+  1) In `.env`: set `OPENAI_API_KEY=sk-...`
+  2) In the app header (per user): paste your key in “Your OpenAI API Key” and Save/Test
+- Optional: `OPENAI_MODEL` (default `gpt-5-nano`), `REDIS_URL` (default `redis://localhost:6379`)
 
 Quick Start (Docker)
 1) Copy the template and set your API key:
@@ -59,17 +48,10 @@ Quick Start (Docker)
 
 Docker Notes
 - The app service binds container port 5000 to host port 5001 (see `docker-compose.yml`).
-- The default command runs Gunicorn with the Eventlet worker to support Socket.IO.
-- The worker service runs Celery for the analysis pipeline.
-
-Common Docker Commands
-- Restart app/worker after code changes:
-  docker compose restart app
-  docker compose restart worker
-- View logs:
-  docker compose logs -f app worker
-- Stop services:
-  docker compose down
+- Common commands:
+  - Restart: `docker compose restart app` (and `worker` if needed)
+  - Logs: `docker compose logs -f app worker`
+  - Stop: `docker compose down`
 
 Local Development (without Docker)
 1) Create a virtualenv and install deps:
@@ -91,21 +73,14 @@ Local Development (without Docker)
 4) Open and (optionally) set your key in the UI header:
    http://localhost:5000
 
-Prompts
-- All prompts live under `prompts/` in these subfolders:
-  - `prompts/stage a transcript analyses/`
-  - `prompts/stage b results analyses/`
-  - `prompts/final output stage/`
-- For an end‑user overview of how staged prompts work (Stage A → Stage B → Final), see PROMPTS_USER_GUIDE.md.
-- For detailed, per‑prompt descriptions and interpretation guidance, see PROMPTS_CATALOG.md.
-- At startup, the app scans these directories and loads available `.md` files. Built‑in analyzer prompts are included in this scan as well, so all analyzers (built‑in and custom) resolve their prompt paths dynamically from the filesystem.
-- From the UI you can:
-  - Edit a prompt file (Edit)
-  - Delete a selected prompt file (Delete)
-  - Reset the editor to a stage‑appropriate template
-  - Delete all prompt files (in the editor modal)
-  - Advanced prompt selection per analyzer (per‑run only): enable the “Advanced” toggle to reveal a prompt dropdown. Dropdowns only appear when an analyzer has more than one prompt option. Selecting a different prompt updates the label next to the analyzer, and that prompt path is used for this run only.
-  - Rescan analyzers (per stage): rebuilds the analyzer registry from the `prompts/` folders and refreshes both the web app and Celery worker so new/updated prompt files are immediately available without restarting processes.
+Prompts (Authoring & Selection)
+- Locations:
+  - Stage A: `prompts/stage a transcript analyses/`
+  - Stage B: `prompts/stage b results analyses/`
+  - Final: `prompts/final output stage/`
+- Discovery: the app scans these folders at startup and on “Rescan”.
+- In the UI (Advanced): pick alternate prompt files per analyzer for a single run; use the editor to view/edit/delete prompt files.
+- Learn more: PROMPTS_USER_GUIDE.md (how staging works) and PROMPTS_CATALOG.md (what each prompt does).
 
 Running an Analysis
 1) Paste transcript text or choose a file.
@@ -113,34 +88,18 @@ Running an Analysis
 3) Click Start. Watch live progress and results populate.
   - Results render as Markdown with code highlighting and readable typography (no raw `#` headers).
   - The results pane uses a light card (black text on white) regardless of OS/browser dark mode.
-  - Tables are server‑normalized (even if the model returns them inside code blocks) to display as real Markdown tables.
+  - Tables render reliably (Markdown tables supported; for critical summaries, prompts may return sanitized HTML tables).
 
-Key Endpoints
-- UI: `/`
-- Health: `/health`
-- API base: `/api`
-  - Prompt options: `GET /api/prompt-options`
-  - Rescan analyzers: `POST /api/analyzers/rescan`
-  - Get/Save prompt: `GET/POST /api/prompts`
-  - Delete prompt file: `DELETE /api/prompts?path=...`
-  - Delete all prompts: `DELETE /api/prompts/all`
-  - Analyze: `POST /api/analyze`
-  - Status: `GET /api/status/<jobId>`
-  - Insights: `GET /api/insights/<jobId>`
+Developer note: API endpoints are documented in docs/WEB_INTERFACE_GUIDE.md.
 
 Troubleshooting
 - App won’t start (Docker): ensure ports 5001 (host) and 5000 (container) aren’t in use.
 - LLM calls fail: verify `OPENAI_API_KEY` and network egress. The app boots without a key, but any LLM action requires one.
 - Redis errors: with Docker Compose, Redis is included. For local dev, start Redis on `localhost:6379` or set `REDIS_URL` accordingly.
 
-Development Notes
-- Prompts are git‑tracked by default. The UI can delete them; you can restore from git.
-- Analyzer prompts are dynamically discovered at startup and on “Rescan”. The worker is also refreshed during rescan so you don’t need to restart it to pick up new prompts.
+Notes
+- Prompts are git‑tracked; the UI can edit/delete them.
 - `.env` is ignored by git. Never commit your API key.
 
-What’s New (2025‑09‑11)
-- Filesystem‑driven analyzers: At startup and on “Rescan”, the app scans `prompts/` and replaces stage analyzer lists from the filesystem. Filenames determine slugs; numeric prefixes are no longer required.
-- Rescan refreshes the worker: The Celery worker reloads the registry/config during Rescan, so new/renamed prompt files are available immediately.
-
-License
-- Proprietary to your project unless you add a license.
+License & Rights
+- Proprietary by default. If you intend to share or open‑source, add a LICENSE file and update this section accordingly.
