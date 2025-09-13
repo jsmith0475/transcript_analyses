@@ -49,6 +49,7 @@ Custom Analyzers (Optional)
 - Click “Start Analysis”. The app enqueues the job and shows live progress tiles.
 - Stage A runs first (transcript analyzers), Stage B second (results analyzers), then Final outputs.
 - The Inter‑Stage Context panel (bottom) displays the exact context passed between stages.
+ - Final analyzers include Meeting Notes, Composite Note, What Should I Ask?, and Insightful Article (~1000 words; privacy‑safe, no PII).
 
 6) View Results and Exports
 - Stage A/B tabs: Select an analyzer tile to view its Markdown output.

@@ -40,7 +40,8 @@ Submitting an Analysis
  - Selecting a different prompt updates the analyzer label to the chosen prompt’s name and applies only to the current run.
  - “Edit” opens the prompt editor modal to view/update template content under the prompts/ directory (server-side validation enforces required variables per stage)
  - “Delete” removes the currently selected prompt file for that analyzer
- - “Delete All Prompts” is available inside the editor modal and removes all prompt files under prompts/ (dangerous)
+  - “Delete All Prompts” is available inside the editor modal and removes all prompt files under prompts/ (dangerous)
+  - Final includes an optional “Insightful Article” generator (~1000 words, privacy‑safe) in addition to Meeting Notes, Composite Note, and What Should I Ask?
 
 API Key in Header
 - At the top of the page, enter “Your OpenAI API Key” to use a session-scoped key.

@@ -89,7 +89,8 @@ Stage B (Results Analysis)
 
 Final (Synthesis)
 - Reads both Stage A and Stage B via `{{ context }}` and may also include a transcript excerpt/summary if configured.
-- Outputs end‑user facing documents (e.g., Meeting Notes). Clear sectioning and action/decision extraction help downstream export and Insights.
+- Outputs end‑user facing documents (e.g., Meeting Notes, Composite Note, What Should I Ask?, and Insightful Article).
+- Privacy: Final prompts should avoid PII and identifying references; replace names with roles and organizations with generic descriptors.
 
 Using tags
 ----------
@@ -129,4 +130,3 @@ A: Stage B uses a fair token budget to ensure each Stage A analyzer is represent
 
 Q: Do I need to include the XML‑like wrapper (`<prompt>`, `<inputs>`, etc.)?
 A: It’s recommended because it documents intent for future maintainers and matches in‑app expectations, but the core requirement is to include the correct variables for your stage (`{{ transcript }}` or `{{ context }}`) and write clear instructions.
-

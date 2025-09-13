@@ -83,6 +83,7 @@ Prompts (Authoring & Selection)
 - Discovery: the app scans these folders at startup and on “Rescan”.
 - In the UI (Advanced): pick alternate prompt files per analyzer for a single run; use the editor to view/edit/delete prompt files.
 - Learn more: PROMPTS_USER_GUIDE.md (how staging works) and PROMPTS_CATALOG.md (what each prompt does).
+ - Included Final prompts: Meeting Notes, Composite Note, What Should I Ask?, and Insightful Article (~1000 words; privacy‑safe, no PII).
 
 Running an Analysis
 1) Paste transcript text or choose a file.
