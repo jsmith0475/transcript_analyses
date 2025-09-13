@@ -5,6 +5,14 @@ Transcript Analysis Tool
 
 An interactive Flask web app for multi‑stage transcript analysis with LLMs. It ingests a transcript, runs Stage A analyzers, rolls them up into Stage B, and then generates Final outputs (e.g., meeting notes, composite notes). Prompts are managed as Markdown files under `prompts/` and can be edited in‑app.
 
+Docs
+- End‑user install (Docker): END_USER_DOCKER_INSTALL.md
+- User guide (running the app): HOW_TO_USE.md
+- Prompts overview (staging and authoring): PROMPTS_USER_GUIDE.md
+- Prompts catalog (per‑prompt details): PROMPTS_CATALOG.md
+- Web interface details: docs/WEB_INTERFACE_GUIDE.md
+- Docker details for developers: docs/DOCKER_GUIDE.md
+
 Features
 - Multi‑stage pipeline: Stage A → Stage B → Final
 - Prompt management UI (edit, select, reset, delete files)
@@ -12,13 +20,7 @@ Features
 - Redis‑backed job status and Socket.IO live updates
 - REST API for UI and automation
 
-Quick Links
-- End‑user install (Docker): END_USER_DOCKER_INSTALL.md
-- User guide (running the app): HOW_TO_USE.md
-- Prompts overview (staging and authoring): PROMPTS_USER_GUIDE.md
-- Prompts catalog (per‑prompt details): PROMPTS_CATALOG.md
-- Web interface details: docs/WEB_INTERFACE_GUIDE.md
-- Docker details for developers: docs/DOCKER_GUIDE.md
+ 
 
 Requirements
 - Docker and Docker Compose (recommended)
