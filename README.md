@@ -15,6 +15,7 @@ Features
 How To Use (User‑Focused)
 - Prefer a simple, non‑technical install? See END_USER_DOCKER_INSTALL.md for a step‑by‑step Docker guide (install Docker Desktop, get the app, start it, and run analyses).
 - See HOW_TO_USE.md for a step‑by‑step user guide (API key in‑app, choosing analyzers/prompts, running, and exporting results).
+- Understand staged prompts and how to write/choose them: see PROMPTS_USER_GUIDE.md.
 
 Requirements
 - Docker and Docker Compose (recommended), or
