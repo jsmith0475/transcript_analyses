@@ -61,10 +61,19 @@
   - **Patentability**: [Likely Patentable / Unlikely Patentable]
     - **Reason**: [Explain why the idea is or is not patentable based on the category and characteristics.]
 
+  ### Markdown & Tables — How to Format
+  - Use clear Markdown headings and bullet lists for explanatory sections.
+  - You may show small, inline examples as Markdown tables. For instance, a header row looks like:
+    
+    My Table Summary: Create a Table that summarizes all stuff. For example:
+    
+    |**My Category**|**An Idea**|**Etc**|**Etc**|**Etc**|
+    |---|---|---|---|---|
+    
+  - For the primary Patentability Summary table at the end of your response, return a real HTML table (see constraints). Do not wrap the HTML table in code fences.
 
-  Patentability Summary: Create a Table that summarizes all patentable ideas For example:
-  |**Category**|**Idea**|**Justification**|**Patentability**|**Reason**|
-  |---|---|---|---|---|
+
+  Patentability Summary (HTML Table Required): provide a tabular summary of all patentable ideas using an HTML `<table>` with `<thead>` and `<tbody>` as specified in the constraints.
 
 </directions>
 

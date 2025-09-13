@@ -96,6 +96,7 @@ Prompts
   - `prompts/stage b results analyses/`
   - `prompts/final output stage/`
 - For an end‑user overview of how staged prompts work (Stage A → Stage B → Final), see PROMPTS_USER_GUIDE.md.
+- For detailed, per‑prompt descriptions and interpretation guidance, see PROMPTS_CATALOG.md.
 - At startup, the app scans these directories and loads available `.md` files. Built‑in analyzer prompts are included in this scan as well, so all analyzers (built‑in and custom) resolve their prompt paths dynamically from the filesystem.
 - From the UI you can:
   - Edit a prompt file (Edit)
