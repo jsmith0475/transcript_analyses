@@ -24,6 +24,11 @@
     - Use Markdown with scannable headings and short paragraphs; bullets only when they aid clarity.
     - Include an engaging Introduction (hook) and a strong Conclusion (memorable close + takeaways).
     - Do NOT include any angle‑bracket tags in your output.
+    - Privacy & Anonymization: Do NOT include PII or any identifying references to real people, companies, products, or organizations. 
+      - Replace specific names with generic roles (e.g., “PM”, “Research Lead”, “customer”).
+      - Replace company/product names with generic descriptors (e.g., “the organization”, “the product”).
+      - Do not include emails, phone numbers, addresses, usernames, IDs, links, or dates that pinpoint identity.
+      - If such details appear in the provided context/transcript, summarize or anonymize them before writing.
   </constraints>
 
   <output_format>
@@ -44,4 +49,3 @@
     - Keep transitions smooth; end each section with a forward‑looking line that sets up the next section.
   </instructions>
 </prompt>
-
