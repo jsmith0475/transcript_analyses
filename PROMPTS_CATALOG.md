@@ -114,6 +114,10 @@ Final — Synthesis (built‑in)
 - What it does: Curates high‑leverage questions for the next conversation based on detected gaps and risks.
 - How to interpret: Treat as a checklist; turn questions into short experiments or agenda items.
 
+4) Insightful Article (`prompts/final output stage/insightful_article.md`)
+- What it does: Generates a ~1000‑word, privacy‑safe article on the principal subject synthesized from the combined Stage A+B context (and optional transcript excerpt/summary). It requires a strong introduction and conclusion, scannable Markdown headings, short paragraphs, and grounded claims (no fabrication). Strict privacy/anonymization constraints prohibit PII or identifying references to real people, companies, or products.
+- How to interpret: Use as a narrative summary for broad stakeholders. Scan the Title/Definition line to confirm the identified subject; in the body, look for core themes supported by explicit evidence from earlier stages. The “Implications” and “Recommendations” sections should translate insights into next steps without leaking identities (roles/organizations remain generic).
+
 Interpreting results wisely
 ---------------------------
 - Triangulate: Prefer patterns that appear across multiple Stage A lenses.
@@ -134,4 +138,3 @@ Selected references and foundations
 Notes
 -----
 This catalog summarizes intent and interpretation. It is not legal advice and does not replace domain‑expert review. When assessing patentability, consult qualified counsel for jurisdiction‑specific standards (e.g., novelty and non‑obviousness).
-
