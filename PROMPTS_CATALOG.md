@@ -76,6 +76,16 @@ Stage A — Transcript Analysis (built‑in and included prompts)
 - Why it matters: Function words correlate with attention, status, group identity, and psychological states; small shifts can reveal big changes.
 - How to interpret: Track pronoun shifts (I→we), certainty/tense markers, and affect balance across segments and speakers.
 
+8) Sowell Vision & Economic Reasoning (`prompts/stage a transcript analyses/soul.md`)
+- What it does: Classifies statements by Sowell’s constrained vs. unconstrained visions; evaluates economic reasoning (trade‑offs, incentives, dispersed knowledge) and cultural explanations.
+- Why it matters: Reveals hidden assumptions about human nature, policy design, and market coordination that drive proposals and conflict.
+- How to interpret: Contrast trade‑off recognition vs. utopian framing; highlight incentive‑aware arguments and evidence‑based appeals; surface red/green flags.
+
+9) SPIN (Situation–Problem–Implication–Need) Analysis (`prompts/stage a transcript analyses/spin-analysis.md`)
+- What it does: Extracts SPIN items per topic thread to show facts/constraints, pains/opportunities, consequences, and desired payoffs.
+- Why it matters: Structures discovery; turns diffuse discussion into decision‑relevant needs with evidence and acceptance criteria.
+- How to interpret: Map SPIN threads across topics; use gaps (missing S/P/I/N) to guide next questions and actions.
+
 Stage B — Results Analysis (built‑in)
 -------------------------------------
 
@@ -98,6 +108,11 @@ Stage B — Results Analysis (built‑in)
 - What it does: Classifies ideas across “Capable/Differentiable × Short/Long‑Term × Fragile/Antifragile” and assesses patentability likelihood.
 - Why it matters: Organizes ideation along strategic dimensions and highlights novelty/non‑obviousness factors (not legal advice).
 - How to interpret: Use HTML summary tables to scan opportunities; look for clusters in Differentiable + Long‑Term cells.
+
+5) SPIN Synthesis (`prompts/stage b results analyses/spin-synthesis.md`)
+- What it does: Ingests Stage A SPIN output to rank needs, score impact/effort/confidence, summarize ROI/timelines, and produce a decision‑ready action plan.
+- Why it matters: Converts discovery into prioritized execution with explicit assumptions, risks, and measurable success criteria.
+- How to interpret: Sort by value score; tie actions to top needs; revisit assumptions as new evidence emerges.
 
 Final — Synthesis (built‑in)
 ----------------------------
