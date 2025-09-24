@@ -21,6 +21,10 @@ Meeting Details: Provide details about the meeting from the {transcript}, captur
 
 Core Subject Areas Analysis: Identify core subject areas discussed in the meeting. Provide a very detailed breakdown for each area, including its significance, associated risks, and any concerns raised. Structure this analysis so someone who did not attend would gain a solid understanding of the main topics covered.
 
+SPIN Summary (if available): If a SPIN analysis exists in the {context} or in the optional spin input, include a SPIN summary by topic in an HTML table with columns: Topic, Item, Situation, Problem, Implication, Need–Payoff, Evidence, Gaps. Use concise entries grounded in quotes or precise paraphrases.
+
+SPIN Next‑Best Questions (if available): Provide 3–5 concise SPIN‑advancing questions with brief model answers (1–2 sentences) based on the transcript/context to progress unresolved Problems or clarify Implications/Need–Payoff.
+
 Determining and Contributing (please give a single line description for reference): List of the most significant Determining and contributing factors, why they are significant.
 
 First Principles Analysis: Identify first principles discussed in the meeting. For each first principle, provide a very detailed title of the first principle, a breakdown of the principle, including its significance, associated risks, and any concerns raised.
@@ -45,4 +49,5 @@ Since these notes will be used in my Obsidian system as my "second brain," link 
  <inputs>
     <context>{{ context }}</context>
     <transcript optional="true">{{ transcript }}</transcript>
-</inputs>
+    <spin_output optional="true">{{ spin_output }}</spin_output>
+ </inputs>
