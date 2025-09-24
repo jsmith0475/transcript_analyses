@@ -193,10 +193,10 @@ Each prompt template has specific input requirements based on its stage:
 
 **Final Stage Prompts**:
 - **Inputs**: 
-  - `{context}` - Combined Stage A results
+  - `{context}` - Combined Stage A + Stage B results
   - `{transcript}` - Original transcript (optional, based on settings)
 - **Processing**: Synthesizes all previous analyses
-- **Output**: Final deliverables (Meeting Notes, Composite Note)
+- **Output**: Final deliverables (Meeting Notes, Composite Note, Executive Summary, What Should I Ask?, Insightful Article)
 
 Insights Output Structure (Final)
 - Final prompts must include explicit sections: “Decisions”, “Action Items”, and “Risks” with single-line bullets.
@@ -226,7 +226,8 @@ Insights Output Structure (Final)
   │   └── 8 patentability.md
   └── final output stage/
       ├── 9 meeting notes.md
-      └── 9 composite note.md
+      ├── 9 composite note.md
+      └── executive_summary.md
   ```
 
 ---
@@ -275,10 +276,13 @@ Insights Output Structure (Final)
 
 5. **Final Stage Processing**:
    - Meeting Notes analyzer receives:
-     - `{context}` - All Stage A results
+     - `{context}` - All Stage A + Stage B results
      - `{transcript}` - Original transcript (if enabled)
    - Composite Note analyzer receives:
-     - `{context}` - All Stage A results  
+     - `{context}` - All Stage A + Stage B results  
+     - `{transcript}` - Original transcript (if enabled)
+   - Executive Summary analyzer receives:
+     - `{context}` - All Stage A + Stage B results  
      - `{transcript}` - Original transcript (if enabled)
    - Generates final deliverables
 

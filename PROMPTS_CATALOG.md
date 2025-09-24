@@ -18,7 +18,7 @@ Real transcripts contain multiple, overlapping signals: facts, intentions, attit
   - Performs higher‑order reasoning: compare/contrast, reconcile conflicts, identify drivers and hypotheses, assess patentability, etc.
 
 - Final — Synthesis (documents for people)
-  - Accumulates Stage A + Stage B and formats end‑user deliverables: Meeting Notes, Composite Notes, and focused question sets.
+  - Accumulates Stage A + Stage B and formats end‑user deliverables: Meeting Notes, Composite Notes, Executive Summaries, and focused question sets.
   - Emphasizes clarity, actions, decisions, risks, and clean exports.
 
 Why this matters for human dynamics
@@ -123,6 +123,7 @@ Final — Synthesis (built‑in)
 
 2) Composite Note (`prompts/final output stage/composite note.md`)
 - What it does: A single document combining key outputs from Stage A and B with metrics.
+- Tone/Format: Plain, direct business language; short sentences; avoid AI‑style phrasing; includes Decisions, Action Items, and Risks.
 - How to interpret: Use as a full audit trail or to onboard new stakeholders.
 
 3) What Should I Ask? (`prompts/final output stage/what_should_i_ask.md`)
@@ -153,3 +154,6 @@ Selected references and foundations
 Notes
 -----
 This catalog summarizes intent and interpretation. It is not legal advice and does not replace domain‑expert review. When assessing patentability, consult qualified counsel for jurisdiction‑specific standards (e.g., novelty and non‑obviousness).
+5) Executive Summary (`prompts/final output stage/executive_summary.md`)
+- What it does: Produces a one‑page, leadership‑ready summary that answers “so what?” and “what now?” with decisions, business impact, key risks, and next steps. Uses a plain, direct tone with short sentences and avoids AI‑style phrasing.
+- How to interpret: Treat as an executive brief for quick alignment. Scan Executive Summary, then Decisions and Action Items for immediate follow‑through; Business Impact & ROI and Timeline provide magnitude and timing at a glance.

@@ -3,7 +3,7 @@ Transcript Analysis Tool
 
 ![Transcript Analysis Tool — Screenshot](docs/images/transcript%20analyzer.png)
 
-An interactive Flask web app for multi‑stage transcript analysis with LLMs. It ingests a transcript, runs Stage A analyzers, rolls them up into Stage B, and then generates Final outputs (e.g., meeting notes, composite notes). Prompts are managed as Markdown files under `prompts/` and can be edited in‑app.
+An interactive Flask web app for multi‑stage transcript analysis with LLMs. It ingests a transcript, runs Stage A analyzers, rolls them up into Stage B, and then generates Final outputs (e.g., meeting notes, composite notes, executive summaries). Prompts are managed as Markdown files under `prompts/` and can be edited in‑app.
 
 Docs
 - End‑user install (Docker): END_USER_DOCKER_INSTALL.md
@@ -83,7 +83,7 @@ Prompts (Authoring & Selection)
 - Discovery: the app scans these folders at startup and on “Rescan”.
 - In the UI (Advanced): pick alternate prompt files per analyzer for a single run; use the editor to view/edit/delete prompt files.
 - Learn more: PROMPTS_USER_GUIDE.md (how staging works) and PROMPTS_CATALOG.md (what each prompt does).
- - Included Final prompts: Meeting Notes, Composite Note, What Should I Ask?, and Insightful Article (~1000 words; privacy‑safe, no PII).
+ - Included Final prompts: Meeting Notes, Composite Note, Executive Summary, What Should I Ask?, and Insightful Article (~1000 words; privacy‑safe, no PII).
 
 Running an Analysis
 1) Paste transcript text or choose a file.

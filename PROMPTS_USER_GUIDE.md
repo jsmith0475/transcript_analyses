@@ -7,7 +7,7 @@ The Transcript Analysis Tool uses a staged prompt workflow to turn raw meeting t
 
 - Stage A (Transcript Analysis): transforms raw transcript text into focused analyses (e.g., Say/Means, Perspective/Perception, Premises/Assertions, Postulate/Theorem). Each Stage A analyzer reads the transcript directly and produces a specialized view.
 - Stage B (Results Analysis): transforms the set of Stage A analyses (combined context) into higher‑order insights (e.g., Competing Hypotheses, First Principles, Determining Factors, Patentability). Stage B may optionally include a transcript preview or summary alongside Stage A results.
-- Final (Synthesis): accumulates Stage A + Stage B results (and optionally a transcript excerpt/summary) to produce final deliverables (e.g., Meeting Notes, Composite Note, What Should I Ask?).
+- Final (Synthesis): accumulates Stage A + Stage B results (and optionally a transcript excerpt/summary) to produce final deliverables (e.g., Meeting Notes, Composite Note, Executive Summary, What Should I Ask?).
 
 Why staging is beneficial
 -------------------------

@@ -68,6 +68,7 @@ The Transcript Analysis Tool employs a microservices-based architecture with asy
 - **Final Stage (2/2)**: Implemented, pending integration
   - Meeting Notes Generator ✓
   - Composite Note Generator ✓
+  - Executive Summary Generator ✓
 
 ### Performance Metrics (Actual)
 | Metric | Current | Target | Status |
@@ -367,6 +368,7 @@ def complete_stage_b(results: List[Dict[str, Any]], job_id: str, stage_a_results
 graph LR
     A[All Results] --> B[Meeting Notes]
     A --> C[Composite Note]
+    A --> D[Executive Summary]
     
     B --> D[Final Outputs]
     C --> D

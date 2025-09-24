@@ -41,7 +41,7 @@ Submitting an Analysis
  - “Edit” opens the prompt editor modal to view/update template content under the prompts/ directory (server-side validation enforces required variables per stage)
  - “Delete” removes the currently selected prompt file for that analyzer
   - “Delete All Prompts” is available inside the editor modal and removes all prompt files under prompts/ (dangerous)
-  - Final includes an optional “Insightful Article” generator (~1000 words, privacy‑safe) in addition to Meeting Notes, Composite Note, and What Should I Ask?
+  - Final includes an optional “Insightful Article” generator (~1000 words, privacy‑safe) in addition to Meeting Notes, Composite Note, Executive Summary, and What Should I Ask?
 
 API Key in Header
 - At the top of the page, enter “Your OpenAI API Key” to use a session-scoped key.
@@ -112,7 +112,7 @@ Inter-Stage Context Panel (new)
 What You Should See
 - Analyzer tiles flip to “In Process” quickly after submission
 - Tiles flip to “Completed” with time and tokens on finish
-- Once Final is done, the Final tab shows Meeting Notes and Composite Note (combined or individually if only one is selected)
+- Once Final is done, the Final tab shows Meeting Notes and Composite Note (combined or individually if only one is selected). Additional Final analyzers (e.g., Executive Summary) are selectable and their outputs are saved under `final/<slug>.md` in job artifacts and available via the status document.
  - The results pane renders Markdown (headings, lists, tables, code) with a light background for readability. Tables are normalized server‑side even when returned inside code fences.
 
 API Reference (Web UI)
@@ -142,7 +142,7 @@ API Reference (Web UI)
       "promptSelection": {
         "stageA": { "say_means": "prompts/.../file.md", ... },
         "stageB": { "competing_hypotheses": "prompts/.../file.md", ... },
-        "final": { "meeting_notes": "prompts/.../file.md", "composite_note": "prompts/.../file.md" }
+        "final": { "meeting_notes": "prompts/.../file.md", "composite_note": "prompts/.../file.md", "executive_summary": "prompts/.../file.md" }
       }
     }
   - Returns: { ok: true, jobId: "uuid", queuedAt: number }
