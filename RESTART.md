@@ -2,7 +2,7 @@
 
 **Purpose**: Quick reference to resume work after an interruption. Reflects the current working system as of September 7, 2025.
 
-**Last Updated**: 2025-09-07  
+**Last Updated**: 2025-09-28  
 **Status**: Production-ready - All 10 analyzers operational with real GPT API calls
 
 ---
@@ -28,6 +28,28 @@
 ---
 
 ## ⚡ Quick Start Commands
+
+### 0. After Machine Restart (Mac M4)
+```bash
+# Navigate to project directory
+cd "/Users/jerrysmith/Library/Mobile Documents/com~apple~CloudDocs/Python Active/Trascript Analysis Codex Test"
+
+# Start Docker containers
+docker compose up -d
+
+# Verify services are running
+docker compose ps
+
+# Test API health
+curl -s http://localhost:5001/api/health | python3 -m json.tool
+```
+
+**Expected Output**:
+- All containers show "Up" status
+- Redis: healthy
+- App: healthy on port 5001
+- Worker: healthy
+- API returns: `{"status":"ok","model":"gpt-4o-mini",...}`
 
 ### 1. Autonomous Verification (Recommended First Step)
 ```bash
@@ -221,6 +243,20 @@ semaphore = asyncio.Semaphore(MAX_CONCURRENT)
 ## 🐛 Troubleshooting
 
 ### Common Issues and Fixes
+
+#### After Machine Restart - Containers Not Starting
+```bash
+# Issue: "no configuration file provided: not found"
+# Solution: Make sure you're in the correct directory
+cd "/Users/jerrysmith/Library/Mobile Documents/com~apple~CloudDocs/Python Active/Trascript Analysis Codex Test"
+
+# Issue: Containers stopped after restart
+# Solution: Start them up
+docker compose up -d
+
+# Issue: Resource deadlock errors
+# Solution: Restart Docker Desktop, then try again
+```
 
 #### Redis Connection Failed
 ```bash

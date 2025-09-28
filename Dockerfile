@@ -29,4 +29,5 @@ ENV FLASK_APP=src.app \
 EXPOSE 5000
 
 # Default command runs Gunicorn with Eventlet for Socket.IO compatibility
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "src.app:create_app()"]
+# Increased timeout for long-running LLM operations (10 minutes)
+CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "--timeout", "600", "--keep-alive", "5", "--max-requests", "1000", "--max-requests-jitter", "100", "src.app:create_app()"]

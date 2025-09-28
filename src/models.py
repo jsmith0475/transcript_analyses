@@ -120,6 +120,8 @@ class Concept(BaseModel):
 
 class AnalysisResult(BaseModel):
     """Result from a single analyzer."""
+    model_config = {"protected_namespaces": ()}
+    
     analyzer_name: str
     raw_output: str
     structured_data: Dict[str, Any] = Field(default_factory=dict)

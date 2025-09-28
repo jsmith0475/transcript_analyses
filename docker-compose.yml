@@ -2,6 +2,7 @@ services:
   redis:
     image: redis:7-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no", "--stop-writes-on-bgsave-error", "no"]
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -14,16 +15,19 @@ services:
     env_file:
       - .env
     environment:
-      - OPENAI_MODEL=gpt-5-nano
+      - OPENAI_MODEL=gpt-4o-mini
       - REDIS_URL=redis://redis:6379
       - FLASK_APP=src.app
       - EVENTLET_NO_GREENDNS=yes
-    volumes:
-      - .:/app
-    command: ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "src.app:create_app()"]
+      - MAX_CONCURRENT=3
+      - STAGE_B_CONTEXT_TOKEN_BUDGET=8000
+    # volumes:
+      # - .:/app
+    command: ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "--timeout", "600", "--keep-alive", "5", "--max-requests", "1000", "--max-requests-jitter", "100", "src.app:create_app()"]
     ports:
       - "5001:5000"
     working_dir: /app
+    restart: unless-stopped
     depends_on:
       redis:
         condition: service_healthy
@@ -39,13 +43,16 @@ services:
     env_file:
       - .env
     environment:
-      - OPENAI_MODEL=gpt-5-nano
+      - OPENAI_MODEL=gpt-4o-mini
       - REDIS_URL=redis://redis:6379
       - EVENTLET_NO_GREENDNS=yes
-    volumes:
-      - .:/app
+      - MAX_CONCURRENT=3
+      - STAGE_B_CONTEXT_TOKEN_BUDGET=8000
+    # volumes:
+      # - .:/app
     working_dir: /app
     command: celery -A src.app.celery_app.celery worker --loglevel=info -Q celery,default
+    restart: unless-stopped
     depends_on:
       redis:
         condition: service_healthy
